@@ -12,80 +12,101 @@ type Move = {
 };
 
 export function ChessGame() {
-  const [game, setGame] = useState<Chess>(new Chess());
-  const [highlightedSquares, setHighlightedSquares] = useState<{
-    [square: string]: React.CSSProperties;
-  }>({});
+    const [game, setGame] = useState<Chess>(new Chess());
+    const [highlightedSquares, setHighlightedSquares] = useState<{[square: string]: React.CSSProperties;}>({});
 
-  function onSquareClick(square: string) {
-    const moves = game.moves({
-      square: square as Square,
-      verbose: true,
-    }) as Array<{ to: string }>;
+    function onSquareClick(square: string) {
+        const moves = game.moves({square: square as Square, verbose: true,}) as Array<{ to: string }>;
 
-    if (moves.length === 0) {
-      setHighlightedSquares({});
-      return;
+        if (moves.length === 0) {
+            setHighlightedSquares({});
+            return;
+        }
+
+        const newHighlights: { [square: string]: React.CSSProperties } = {};
+
+        moves.forEach((move) => {
+            newHighlights[move.to] = {
+                boxShadow: "inset 0 0 0 10px #baca44",
+            };
+        });
+
+        setHighlightedSquares(newHighlights);
     }
 
-    const newHighlights: { [square: string]: React.CSSProperties } = {};
-    moves.forEach((move) => {
-      newHighlights[move.to] = {
-        boxShadow: "inset 0 0 0 10px #baca44",
-      };
-    });
+    function onPieceDragBegin(piece: string, sourceSquare: string) {
+        const moves = game.moves({square: sourceSquare as Square, verbose: true,}) as Array<{ to: string }>;
 
-    setHighlightedSquares(newHighlights);
-  }
+        if (moves.length === 0) {
+            setHighlightedSquares({});
+            return;
+        }
 
-  function onPieceDragBegin(piece: string, sourceSquare: string) {
-    const moves = game.moves({
-      square: sourceSquare as Square,
-      verbose: true,
-    }) as Array<{ to: string }>;
+        const newHighlights: { [square: string]: React.CSSProperties } = {};
 
-    if (moves.length === 0) {
-      setHighlightedSquares({});
-      return;
+        moves.forEach((move) => {
+            newHighlights[move.to] = {
+                boxShadow: "inset 0 0 0 10px #baca44",
+            };
+        });
+
+        setHighlightedSquares(newHighlights);
     }
 
-    const newHighlights: { [square: string]: React.CSSProperties } = {};
-    moves.forEach((move) => {
-      newHighlights[move.to] = {
-        boxShadow: "inset 0 0 0 10px #baca44",
-      };
-    });
+    function makeAMove(move: Move | string) {
+        const gameCopy = new Chess(game.fen());
+        const result = gameCopy.move(move);
 
-    setHighlightedSquares(newHighlights);
-  }
+        if (result) setGame(gameCopy);
 
-  function makeAMove(move: Move | string) {
-    const gameCopy = new Chess(game.fen());
-    const result = gameCopy.move(move);
-    if (result) setGame(gameCopy);
-    return result;
-  }
+        return result;
+    }
 
-  function onDrop(sourceSquare: string, targetSquare: string): boolean {
-    const move = makeAMove({
-      from: sourceSquare,
-      to: targetSquare,
-    });
+    function onDrop(sourceSquare: string, targetSquare: string): boolean {
+        const move = makeAMove({from: sourceSquare, to: targetSquare,});
 
-    if (move === null) return false;
-    setHighlightedSquares({});
-    return true;
-  }
-  return (
-    <Chessboard
-      position={game.fen()}
-      onPieceDrop={onDrop}
-      onSquareClick={onSquareClick}
-      onPieceDragBegin={onPieceDragBegin}
-      customSquareStyles={highlightedSquares}
-      areArrowsAllowed={true}
-      showBoardNotation={true}
-      boardOrientation="white"
-    />
-  );
+        if (move === null) return false;
+
+        setHighlightedSquares({});
+
+        return true;
+    }
+
+    function onPromotionCheck(sourceSquare: Square, targetSquare: Square, piece: string): boolean {
+
+        if ((piece === "wP" && sourceSquare[1] === "7" && targetSquare[1] === "8") || (piece === "bP" && sourceSquare[1] === "2" && targetSquare[1] === "1")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    function onPromotionPieceSelect(piece?: string, promoteFromSquare?: Square,  promoteToSquare?: Square): boolean {
+        if (!piece || !promoteFromSquare || !promoteToSquare) return false;
+
+        const promotion = piece[piece.length - 1].toLowerCase() as "q" | "r" | "b" | "n";
+        const move = makeAMove({ from: promoteFromSquare, to: promoteToSquare, promotion });
+
+        if (move) {
+            setHighlightedSquares({});
+            return true;
+        }
+
+        return false;
+    }
+
+    return (
+        <Chessboard
+        position={game.fen()}
+        onPieceDrop={onDrop}
+        onSquareClick={onSquareClick}
+        onPieceDragBegin={onPieceDragBegin}
+        onPromotionCheck={onPromotionCheck}
+        onPromotionPieceSelect={onPromotionPieceSelect}
+        customSquareStyles={highlightedSquares}
+        areArrowsAllowed={true}
+        showBoardNotation={true}
+        boardOrientation="white"
+        />
+    );
 }
