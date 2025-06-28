@@ -63,6 +63,12 @@ export function ChessGame() {
     }
 
     function onDrop(sourceSquare: string, targetSquare: string): boolean {
+        const piece = game.get(sourceSquare as Square);
+        const isPawn = piece?.type === "p";
+        const isPromotionRank = (piece?.color === "w" && targetSquare[1] === "8") || (piece?.color === "b" && targetSquare[1] === "1");
+
+        if(isPawn && isPromotionRank) return false;
+
         const move = makeAMove({from: sourceSquare, to: targetSquare,});
 
         if (move === null) return false;
