@@ -7,7 +7,14 @@ export default function Home() {
     <div className="flex items-center justify-center min-h-screen">
       <div className="grid grid-cols-2 w-[90%]">
         <div>
-          <Chessboard id="BasicBoard" />
+          <Chessboard 
+            areArrowsAllowed={true}
+            showBoardNotation={true}
+            boardOrientation="white"
+            customNotationStyle={{
+              color: "black", 
+            }}
+          />
         </div>
         <div className="flex items-center justify-center">
           Other stuff
