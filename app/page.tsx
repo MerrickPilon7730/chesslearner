@@ -25,15 +25,32 @@ export default function Home() {
 
     const newHighlights: { [square: string]: React.CSSProperties } = {};
     moves.forEach((move) => {
-    newHighlights[move.to] = {
-      boxShadow: "inset 0 0 0 10px #baca44",
-    };
+      newHighlights[move.to] = {
+        boxShadow: "inset 0 0 0 10px #baca44",
+      };
 
-    });
+      });
 
     setHighlightedSquares(newHighlights);
   }
 
+  function onPieceDragBegin(piece: string, sourceSquare: string) {
+    const moves = game.moves({ square: sourceSquare as Square, verbose: true }) as Array<{ to: string }>;
+
+    if (moves.length === 0) {
+      setHighlightedSquares({});
+      return;
+    }
+
+    const newHighlights: { [square: string]: React.CSSProperties } = {};
+    moves.forEach((move) => {
+      newHighlights[move.to] = {
+        boxShadow: "inset 0 0 0 10px #baca44",
+      };
+    });
+
+    setHighlightedSquares(newHighlights);
+  }
 
   function makeAMove(move: Move | string) {
     const gameCopy = new Chess(game.fen()); 
@@ -61,6 +78,7 @@ export default function Home() {
             position={game.fen()}
             onPieceDrop={onDrop}
             onSquareClick={onSquareClick}
+            onPieceDragBegin={onPieceDragBegin}
             customSquareStyles={highlightedSquares}
             areArrowsAllowed={true}
             showBoardNotation={true}
