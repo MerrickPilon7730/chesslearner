@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Chess } from "chess.js"; 
 import { Chessboard } from "react-chessboard";
+import type { Square } from "chess.js";
 
 type Move = {
   from: string;
@@ -12,6 +13,27 @@ type Move = {
 
 export default function Home() {
   const [game, setGame] = useState<Chess>(new Chess());
+  const [highlightedSquares, setHighlightedSquares] = useState<{ [square: string]: React.CSSProperties }>({});
+
+  function onSquareClick(square: string) {
+    const moves = game.moves({ square: square as Square, verbose: true }) as Array<{ to: string }>;
+
+    if (moves.length === 0) {
+      setHighlightedSquares({});
+      return;
+    }
+
+    const newHighlights: { [square: string]: React.CSSProperties } = {};
+    moves.forEach((move) => {
+    newHighlights[move.to] = {
+      boxShadow: "inset 0 0 0 10px #baca44",
+    };
+
+    });
+
+    setHighlightedSquares(newHighlights);
+  }
+
 
   function makeAMove(move: Move | string) {
     const gameCopy = new Chess(game.fen()); 
@@ -27,6 +49,7 @@ export default function Home() {
     });
 
     if (move === null) return false;
+    setHighlightedSquares({});
     return true;
   }
 
@@ -37,12 +60,11 @@ export default function Home() {
           <Chessboard
             position={game.fen()}
             onPieceDrop={onDrop}
+            onSquareClick={onSquareClick}
+            customSquareStyles={highlightedSquares}
             areArrowsAllowed={true}
             showBoardNotation={true}
             boardOrientation="white"
-            customNotationStyle={{
-              color: "black",
-            }}
           />
         </div>
         <div className="flex items-center justify-center">
