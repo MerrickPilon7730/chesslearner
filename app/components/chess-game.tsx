@@ -58,49 +58,20 @@ export function ChessGame() {
         setHighlightedSquares(newHighlights);
     }
 
-    function makeAMove(move: Move | string) {
-        try {
-            const gameCopy = new Chess(game.fen());
-            const result = gameCopy.move(move);
+    function makeAMove(move: Move | string): Chess | null {
+    try {
+        const gameCopy = new Chess(game.fen());
+        const result = gameCopy.move(move);
 
-            if (result) {
-                setGame(gameCopy);
+        if (result) return gameCopy;
 
-                if (gameCopy.isCheckmate()) {
-                    setIsGameOver(true)
-                    const loserColor = game.turn() === "w" ? "b" : "w";
-                    const board = gameCopy.board();
-
-                    for (let row = 0; row < 8; row++) {
-                        for (let col = 0; col < 8; col++) {
-                            const piece = board[row][col];
-                            if (piece?.type === "k" && piece.color === loserColor) {
-                                const file = String.fromCharCode("a".charCodeAt(0) + col);
-                                const rank = `${8 - row}`;
-                                const kingSquare = `${file}${rank}`;
-                                
-                                setHighlightedSquares({})
-
-                                setHighlightedSquares((prev) => ({
-                                    ...prev,
-                                    [kingSquare]: {
-                                        backgroundColor: "rgba(255, 0, 0, 0.5)", 
-                                    },
-                                }));
-                            }
-                        }
-                    }
-                }
-
-                return result;
-            }
-
-            return null;
-        } catch (error) {
-            console.warn("Invalid move attempted:", move, error);
-            return null;
-        }
+        return null;
+    } catch (error) {
+        console.warn("Invalid move attempted:", move, error);
+        return null;
     }
+    }
+
 
 
     function onDrop(sourceSquare: string, targetSquare: string): boolean {
@@ -114,10 +85,41 @@ export function ChessGame() {
 
         if (isPawn && isPromotionRank) return false;
 
-        const move = makeAMove({ from: sourceSquare, to: targetSquare });
+        const updatedGame = makeAMove({ from: sourceSquare, to: targetSquare });
 
-        return move !== null;
+        if (!updatedGame) return false;
+
+        setGame(updatedGame);
+
+        if (updatedGame.isCheckmate()) {
+            setIsGameOver(true);
+
+            const loserColor = updatedGame.turn();
+            const board = updatedGame.board();
+
+            for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                const piece = board[row][col];
+                if (piece?.type === "k" && piece.color === loserColor) {
+                const file = String.fromCharCode("a".charCodeAt(0) + col);
+                const rank = `${8 - row}`;
+                const kingSquare = `${file}${rank}`;
+
+                setHighlightedSquares({
+                    [kingSquare]: {
+                    backgroundColor: "rgba(255, 0, 0, 0.5)",
+                    },
+                });
+                }
+            }
+            }
+        } else {
+            setHighlightedSquares({});
+        }
+
+        return true;
     }
+
 
 
     function onPromotionCheck(sourceSquare: Square, targetSquare: Square, piece: string): boolean {
@@ -129,19 +131,49 @@ export function ChessGame() {
         return false;
     }
 
-    function onPromotionPieceSelect(piece?: string, promoteFromSquare?: Square,  promoteToSquare?: Square): boolean {
+    function onPromotionPieceSelect(piece?: string, promoteFromSquare?: Square, promoteToSquare?: Square): boolean {
         if (!piece || !promoteFromSquare || !promoteToSquare) return false;
 
         const promotion = piece[piece.length - 1].toLowerCase() as "q" | "r" | "b" | "n";
-        const move = makeAMove({ from: promoteFromSquare, to: promoteToSquare, promotion });
+        const updatedGame = makeAMove({
+            from: promoteFromSquare,
+            to: promoteToSquare,
+            promotion,
+        });
 
-        if (move) {
+        if (!updatedGame) return false;
+
+        setGame(updatedGame);
+
+        if (updatedGame.isCheckmate()) {
+            setIsGameOver(true);
+
+            const loserColor = updatedGame.turn() === "w" ? "b" : "w";
+            const board = updatedGame.board();
+
+            for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                const piece = board[row][col];
+                if (piece?.type === "k" && piece.color === loserColor) {
+                const file = String.fromCharCode("a".charCodeAt(0) + col);
+                const rank = `${8 - row}`;
+                const kingSquare = `${file}${rank}`;
+
+                setHighlightedSquares({
+                    [kingSquare]: {
+                    backgroundColor: "rgba(255, 0, 0, 0.5)",
+                    },
+                });
+                }
+            }
+            }
+        } else {
             setHighlightedSquares({});
-            return true;
         }
 
-        return false;
+        return true;
     }
+
 
     return (
         <Chessboard
