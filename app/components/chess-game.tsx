@@ -54,12 +54,19 @@ export function ChessGame() {
     }
 
     function makeAMove(move: Move | string) {
-        const gameCopy = new Chess(game.fen());
-        const result = gameCopy.move(move);
+        try {
+            const gameCopy = new Chess(game.fen());
+            const result = gameCopy.move(move);
 
-        if (result) setGame(gameCopy);
+            if (result) {
+                setGame(gameCopy);
+            }
 
-        return result;
+            return result;
+        } catch (error) {
+            console.warn("Invalid move attempted:", move, error);
+            return null;
+        }
     }
 
     function onDrop(sourceSquare: string, targetSquare: string): boolean {
