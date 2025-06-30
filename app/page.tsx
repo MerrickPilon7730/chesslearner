@@ -1,3 +1,4 @@
+import { ThemeToggle } from "@/components/theme-toggle";
 import { ChessGame } from "./components/chess-game";
 
 export default function Home() {
@@ -7,7 +8,10 @@ export default function Home() {
         <div className="flex items-center justify-center">
           <ChessGame />
         </div>
-        <div className="flex items-center justify-center">Other stuff</div>
+        <div className="flex items-center justify-center">
+          <ThemeToggle />
+          Other stuff
+          </div>
       </div>
     </div>
   );
