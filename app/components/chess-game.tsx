@@ -14,8 +14,11 @@ type Move = {
 export function ChessGame() {
     const [game, setGame] = useState<Chess>(new Chess());
     const [highlightedSquares, setHighlightedSquares] = useState<{[square: string]: React.CSSProperties;}>({});
+    const [isGameOver, setIsGameOver] = useState(false);
 
     function onSquareClick(square: string) {
+        if (isGameOver) return;
+
         const moves = game.moves({square: square as Square, verbose: true,}) as Array<{ to: string }>;
 
         if (moves.length === 0) {
@@ -35,6 +38,8 @@ export function ChessGame() {
     }
 
     function onPieceDragBegin(piece: string, sourceSquare: string) {
+        if (isGameOver) return;
+
         const moves = game.moves({square: sourceSquare as Square, verbose: true,}) as Array<{ to: string }>;
 
         if (moves.length === 0) {
@@ -60,30 +65,60 @@ export function ChessGame() {
 
             if (result) {
                 setGame(gameCopy);
+
+                if (gameCopy.isCheckmate()) {
+                    setIsGameOver(true)
+                    const loserColor = game.turn() === "w" ? "b" : "w";
+                    const board = gameCopy.board();
+
+                    for (let row = 0; row < 8; row++) {
+                        for (let col = 0; col < 8; col++) {
+                            const piece = board[row][col];
+                            if (piece?.type === "k" && piece.color === loserColor) {
+                                const file = String.fromCharCode("a".charCodeAt(0) + col);
+                                const rank = `${8 - row}`;
+                                const kingSquare = `${file}${rank}`;
+                                
+                                setHighlightedSquares({})
+
+                                setHighlightedSquares((prev) => ({
+                                    ...prev,
+                                    [kingSquare]: {
+                                        backgroundColor: "rgba(255, 0, 0, 0.5)", 
+                                    },
+                                }));
+                            }
+                        }
+                    }
+                }
+
+                return result;
             }
 
-            return result;
+            return null;
         } catch (error) {
             console.warn("Invalid move attempted:", move, error);
             return null;
         }
     }
 
+
     function onDrop(sourceSquare: string, targetSquare: string): boolean {
+        if (isGameOver) return false;
+
         const piece = game.get(sourceSquare as Square);
         const isPawn = piece?.type === "p";
-        const isPromotionRank = (piece?.color === "w" && targetSquare[1] === "8") || (piece?.color === "b" && targetSquare[1] === "1");
+        const isPromotionRank =
+            (piece?.color === "w" && targetSquare[1] === "8") ||
+            (piece?.color === "b" && targetSquare[1] === "1");
 
-        if(isPawn && isPromotionRank) return false;
+        if (isPawn && isPromotionRank) return false;
 
-        const move = makeAMove({from: sourceSquare, to: targetSquare,});
+        const move = makeAMove({ from: sourceSquare, to: targetSquare });
 
-        if (move === null) return false;
-
-        setHighlightedSquares({});
-
-        return true;
+        return move !== null;
     }
+
 
     function onPromotionCheck(sourceSquare: Square, targetSquare: Square, piece: string): boolean {
 
@@ -120,6 +155,7 @@ export function ChessGame() {
         areArrowsAllowed={true}
         showBoardNotation={true}
         boardOrientation="white"
+        arePiecesDraggable={!isGameOver}
         />
     );
 }
