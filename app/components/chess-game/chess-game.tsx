@@ -11,7 +11,11 @@ type Move = {
   promotion?: string;
 };
 
-export function ChessGame() {
+type props ={
+    side: "black" | "white";
+}
+
+export function ChessGame({side}: props) {
     const [game, setGame] = useState<Chess>(new Chess());
     const [highlightedSquares, setHighlightedSquares] = useState<{[square: string]: React.CSSProperties;}>({});
     const [isGameOver, setIsGameOver] = useState(false);
@@ -187,7 +191,7 @@ export function ChessGame() {
                 customSquareStyles={highlightedSquares}
                 areArrowsAllowed={true}
                 showBoardNotation={true}
-                boardOrientation="white"
+                boardOrientation={side}
                 arePiecesDraggable={!isGameOver}
             />
         </div>
