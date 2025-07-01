@@ -8,7 +8,7 @@ export function HeaderWrapper() {
         <div className="flex items-center">
           <HeaderLogo />
         </div>
-        <div>
+        <div className="text-white">
           Other
         </div>
       </div>
