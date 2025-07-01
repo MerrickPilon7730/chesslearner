@@ -4,7 +4,7 @@ import { ChessWrapper } from "./components/chess-game/chess-wrapper";
 
 export default function Home() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center">
       <div className="grid grid-cols-2 w-[90%]">
         <div className="flex items-center justify-center">
           <ChessWrapper />
