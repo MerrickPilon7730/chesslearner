@@ -176,19 +176,21 @@ export function ChessGame() {
 
 
     return (
-        <Chessboard
-        position={game.fen()}
-        onPieceDrop={onDrop}
-        onSquareClick={onSquareClick}
-        onPieceDragBegin={onPieceDragBegin}
-        onPromotionCheck={onPromotionCheck}
-        onPromotionPieceSelect={onPromotionPieceSelect}
-        customSquareStyles={highlightedSquares}
-        areArrowsAllowed={true}
-        showBoardNotation={true}
-        boardOrientation="white"
-        arePiecesDraggable={!isGameOver}
-        boardWidth={700}
-        />
+        <div className="w-full max-w-[700px] aspect-square">
+            <Chessboard
+                position={game.fen()}
+                onPieceDrop={onDrop}
+                onSquareClick={onSquareClick}
+                onPieceDragBegin={onPieceDragBegin}
+                onPromotionCheck={onPromotionCheck}
+                onPromotionPieceSelect={onPromotionPieceSelect}
+                customSquareStyles={highlightedSquares}
+                areArrowsAllowed={true}
+                showBoardNotation={true}
+                boardOrientation="white"
+                arePiecesDraggable={!isGameOver}
+            />
+        </div>
+
     );
 }
