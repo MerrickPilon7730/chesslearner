@@ -1,12 +1,12 @@
+import type { Config } from 'tailwindcss';
+import aspectRatio from '@tailwindcss/aspect-ratio';
 
-module.exports = {
-  darkMode: 'class',
-  content: [
-    './app/**/*.{js,ts,jsx,tsx}', 
-    './components/**/*.{js,ts,jsx,tsx}'
-    ],
+const config: Config = {
+  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   theme: {
     extend: {},
   },
-  plugins: [],
+  plugins: [aspectRatio],
 };
+
+export default config;
