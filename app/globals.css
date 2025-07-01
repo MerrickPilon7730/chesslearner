@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 .dark {
-  --background: #1e293b !important;
+  --background: #262626 !important;
   --foreground: #f9f9f9 !important;
   --card: #1e293b !important;
   --card-foreground: #f9f9f9 !important;
@@ -82,7 +82,7 @@ body {
 :root {
   --radius: 0.625rem;
   --background: #f9f9f9;
-  --foreground: #1e293b;
+  --foreground: #3D3D3E;
   --card: #fff;
   --card-foreground: #1e293b;
   --popover: oklch(1 0 0);
