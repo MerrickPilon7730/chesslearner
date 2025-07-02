@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { ChessGame } from "./chess-game";
 
 export function ChessWrapper() {
-    const [side, setSide] = useState<"black" | "white">("black")
+    const [side, setSide] = useState<"black" | "white">("white")
     const [string, setString] = useState<"Black" | "White">("Black")
 
     function onClick() {
-        setSide(side === "black" ? "white": "black");
+        setSide(side === "white" ? "black": "white");
         setString(string === "Black" ? "White": "Black")
     }
     
