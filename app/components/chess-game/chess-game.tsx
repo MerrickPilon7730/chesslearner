@@ -63,29 +63,92 @@ export function ChessGame({side}: props) {
     }
 
     function makeAMove(move: Move | string): Chess | null {
-    try {
-        const gameCopy = new Chess(game.fen());
-        const result = gameCopy.move(move);
+        try {
+            const gameCopy = new Chess(game.fen());
+            const result = gameCopy.move(move);
 
-        if (result) return gameCopy;
+            if (result) return gameCopy;
 
-        return null;
-    } catch (error) {
-        console.warn("Invalid move attempted:", move, error);
-        return null;
+            return null;
+        } catch (error) {
+            console.warn("Invalid move attempted:", move, error);
+            return null;
+        }
     }
+
+    async function handleAIMove(fen: string) {
+        try {
+            const response = await fetch("/api/stockfish-analysis", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fen }),
+            });
+
+            const data = await response.json();
+            const bestMove: string = data.move;
+            console.log("AI best move:", bestMove);
+
+            if (bestMove?.length >= 4) {
+                const aiFrom = bestMove.slice(0, 2);
+                const aiTo = bestMove.slice(2, 4);
+                const aiPromotion = bestMove.length === 5 ? bestMove[4] : undefined;
+
+                const aiGameInstance = new Chess(fen);
+
+                const aiGame = aiGameInstance.move({
+                    from: aiFrom,
+                    to: aiTo,
+                    promotion: aiPromotion,
+                });
+
+                if (aiGame) {
+                    setGame(aiGameInstance); 
+
+                    if (aiGameInstance.isCheckmate()) setIsGameOver(true);
+
+                    checkmate(aiGameInstance);
+                } else {
+                    console.warn("AI move was invalid for current position:", bestMove);
+                }
+            }
+        } catch (err) {
+            console.error("AI move failed:", err);
+        }
     }
 
+    function checkmate(gameInstance: Chess) {
+        if (gameInstance.isCheckmate()) {
+            const loserColor = gameInstance.turn(); 
+            const board = gameInstance.board();
 
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const piece = board[row][col];
+                    if (piece?.type === "k" && piece.color === loserColor) {
+                        const file = String.fromCharCode("a".charCodeAt(0) + col);
+                        const rank = `${8 - row}`;
+                        const kingSquare = `${file}${rank}`;
+
+                        setHighlightedSquares({
+                            [kingSquare]: {
+                            backgroundColor: "rgba(255, 0, 0, 0.5)",
+                            },
+                        });
+                        return; 
+                    }
+                }
+            }
+        } else {
+            setHighlightedSquares({});
+        }
+    }
 
     function onDrop(sourceSquare: string, targetSquare: string): boolean {
         if (isGameOver) return false;
 
         const piece = game.get(sourceSquare as Square);
         const isPawn = piece?.type === "p";
-        const isPromotionRank =
-            (piece?.color === "w" && targetSquare[1] === "8") ||
-            (piece?.color === "b" && targetSquare[1] === "1");
+        const isPromotionRank = (piece?.color === "w" && targetSquare[1] === "8") || (piece?.color === "b" && targetSquare[1] === "1");
 
         if (isPawn && isPromotionRank) return false;
 
@@ -94,37 +157,18 @@ export function ChessGame({side}: props) {
         if (!updatedGame) return false;
 
         setGame(updatedGame);
+        setHighlightedSquares({});
 
         if (updatedGame.isCheckmate()) {
             setIsGameOver(true);
-
-            const loserColor = updatedGame.turn();
-            const board = updatedGame.board();
-
-            for (let row = 0; row < 8; row++) {
-            for (let col = 0; col < 8; col++) {
-                const piece = board[row][col];
-                if (piece?.type === "k" && piece.color === loserColor) {
-                const file = String.fromCharCode("a".charCodeAt(0) + col);
-                const rank = `${8 - row}`;
-                const kingSquare = `${file}${rank}`;
-
-                setHighlightedSquares({
-                    [kingSquare]: {
-                    backgroundColor: "rgba(255, 0, 0, 0.5)",
-                    },
-                });
-                }
-            }
-            }
-        } else {
-            setHighlightedSquares({});
         }
+
+        checkmate(updatedGame);
+
+        handleAIMove(updatedGame.fen());
 
         return true;
     }
-
-
 
     function onPromotionCheck(sourceSquare: Square, targetSquare: Square, piece: string): boolean {
 
