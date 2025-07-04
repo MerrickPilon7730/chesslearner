@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
@@ -13,12 +13,15 @@ type Move = {
 
 type props ={
     side: "black" | "white";
+    game: Chess;
+    setGame: (game: Chess) => void;
+    isGameOver: boolean;
+    setIsGameOver: (over: boolean) => void;
+    difficulty: number;
 }
 
-export function ChessGame({side}: props) {
-    const [game, setGame] = useState<Chess>(new Chess());
+export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, difficulty}: props) {
     const [highlightedSquares, setHighlightedSquares] = useState<{[square: string]: React.CSSProperties;}>({});
-    const [isGameOver, setIsGameOver] = useState(false);
 
     function onSquareClick(square: string) {
         if (isGameOver) return;
@@ -76,12 +79,41 @@ export function ChessGame({side}: props) {
         }
     }
 
-    async function handleAIMove(fen: string) {
+    const checkmate = useCallback((gameInstance: Chess) => {
+        if (gameInstance.isCheckmate()) {
+            const loserColor = gameInstance.turn(); 
+            const board = gameInstance.board();
+
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const piece = board[row][col];
+                    if (piece?.type === "k" && piece.color === loserColor) {
+                        const file = String.fromCharCode("a".charCodeAt(0) + col);
+                        const rank = `${8 - row}`;
+                        const kingSquare = `${file}${rank}`;
+
+                        setHighlightedSquares({
+                            [kingSquare]: {
+                            backgroundColor: "rgba(255, 0, 0, 0.5)",
+                            },
+                        });
+                        return; 
+                    }
+                }
+            }
+        } else {
+            setHighlightedSquares({});
+        }
+    }, []);
+
+    const handleAIMove = useCallback(async (fen: string) => {
+        if (new Chess(fen).turn() === side[0]) return;
+
         try {
             const response = await fetch("/api/stockfish-analysis", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ fen }),
+            body: JSON.stringify({ fen, difficulty }),
             });
 
             const data = await response.json();
@@ -114,37 +146,12 @@ export function ChessGame({side}: props) {
         } catch (err) {
             console.error("AI move failed:", err);
         }
-    }
-
-    function checkmate(gameInstance: Chess) {
-        if (gameInstance.isCheckmate()) {
-            const loserColor = gameInstance.turn(); 
-            const board = gameInstance.board();
-
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const piece = board[row][col];
-                    if (piece?.type === "k" && piece.color === loserColor) {
-                        const file = String.fromCharCode("a".charCodeAt(0) + col);
-                        const rank = `${8 - row}`;
-                        const kingSquare = `${file}${rank}`;
-
-                        setHighlightedSquares({
-                            [kingSquare]: {
-                            backgroundColor: "rgba(255, 0, 0, 0.5)",
-                            },
-                        });
-                        return; 
-                    }
-                }
-            }
-        } else {
-            setHighlightedSquares({});
-        }
-    }
+    }, [side, checkmate, setGame, setIsGameOver, difficulty]);
 
     function onDrop(sourceSquare: string, targetSquare: string): boolean {
         if (isGameOver) return false;
+
+        if (game.turn() !== side[0]) return false;
 
         const piece = game.get(sourceSquare as Square);
         const isPawn = piece?.type === "p";
@@ -165,7 +172,9 @@ export function ChessGame({side}: props) {
 
         checkmate(updatedGame);
 
-        handleAIMove(updatedGame.fen());
+        if (updatedGame.turn() !== side[0]) {
+            handleAIMove(updatedGame.fen());
+        }
 
         return true;
     }
@@ -222,6 +231,11 @@ export function ChessGame({side}: props) {
         return true;
     }
 
+    useEffect(() => {
+        if (game.turn() !== side[0]) {
+            handleAIMove(game.fen());
+        }
+    }, [side, game, handleAIMove]);
 
     return (
         <div className="w-full max-w-[700px] aspect-square">
