@@ -4,7 +4,9 @@ import path from "path";
 
 export async function POST(request: Request) {
     const body = await request.json();
-    const fen = body.fen;
+    const {fen, difficulty} = body;
+
+    const depth = Math.max(1, Math.min(20, parseInt(difficulty, 10) || 5));
 
     if (!fen) {
         return NextResponse.json({ error: "FEN is required" }, { status: 400 });
@@ -17,7 +19,7 @@ export async function POST(request: Request) {
 
         stockfish.stdin.write("uci\n");
         stockfish.stdin.write(`position fen ${fen}\n`);
-        stockfish.stdin.write("go depth 15\n");
+        stockfish.stdin.write(`go depth ${depth}\n`);
 
         let output = "";
 
