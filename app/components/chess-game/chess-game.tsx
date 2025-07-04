@@ -237,6 +237,12 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         }
     }, [side, game, handleAIMove]);
 
+    useEffect(() => {
+        if (!game.isCheckmate()) {
+            setHighlightedSquares({});
+        }
+    }, [game]);
+
     return (
         <div className="w-full max-w-[700px] aspect-square">
             <Chessboard
