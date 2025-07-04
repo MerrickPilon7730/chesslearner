@@ -22,6 +22,7 @@ type props ={
 
 export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, difficulty}: props) {
     const [highlightedSquares, setHighlightedSquares] = useState<{[square: string]: React.CSSProperties;}>({});
+    const [isProcessingAI, setIsProcessingAI] = useState(false);
 
     function onSquareClick(square: string) {
         if (isGameOver) return;
@@ -107,13 +108,16 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
     }, []);
 
     const handleAIMove = useCallback(async (fen: string) => {
-        if (new Chess(fen).turn() === side[0]) return;
+        if (isProcessingAI || new Chess(fen).turn() === side[0]) return;
+
+        setIsProcessingAI(true);
+        console.log("Sending difficulty to API:", difficulty);
 
         try {
             const response = await fetch("/api/stockfish-analysis", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ fen, difficulty }),
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ fen, difficulty }),
             });
 
             const data = await response.json();
@@ -126,7 +130,6 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
                 const aiPromotion = bestMove.length === 5 ? bestMove[4] : undefined;
 
                 const aiGameInstance = new Chess(fen);
-
                 const aiGame = aiGameInstance.move({
                     from: aiFrom,
                     to: aiTo,
@@ -134,10 +137,8 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
                 });
 
                 if (aiGame) {
-                    setGame(aiGameInstance); 
-
+                    setGame(aiGameInstance);
                     if (aiGameInstance.isCheckmate()) setIsGameOver(true);
-
                     checkmate(aiGameInstance);
                 } else {
                     console.warn("AI move was invalid for current position:", bestMove);
@@ -145,8 +146,11 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
             }
         } catch (err) {
             console.error("AI move failed:", err);
+        } finally {
+            setIsProcessingAI(false);
         }
-    }, [side, checkmate, setGame, setIsGameOver, difficulty]);
+    }, [side, checkmate, setGame, setIsGameOver, difficulty, isProcessingAI]);
+
 
     function onDrop(sourceSquare: string, targetSquare: string): boolean {
         if (isGameOver) return false;
