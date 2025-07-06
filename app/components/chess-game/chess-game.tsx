@@ -138,7 +138,13 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
 
                 if (aiGame) {
                     setGame(aiGameInstance);
-                    if (aiGameInstance.isCheckmate()) setIsGameOver(true);
+
+                    if (aiGameInstance.isCheckmate()) {
+                        setIsGameOver(true);
+                    } else if (aiGameInstance.isDraw()){
+                        setIsGameOver(true);
+                    }
+
                     checkmate(aiGameInstance);
                 } else {
                     console.warn("AI move was invalid for current position:", bestMove);
@@ -171,6 +177,8 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         setHighlightedSquares({});
 
         if (updatedGame.isCheckmate()) {
+            setIsGameOver(true);
+        } else if (updatedGame.isDraw()){
             setIsGameOver(true);
         }
 
@@ -213,21 +221,23 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
             const board = updatedGame.board();
 
             for (let row = 0; row < 8; row++) {
-            for (let col = 0; col < 8; col++) {
-                const piece = board[row][col];
-                if (piece?.type === "k" && piece.color === loserColor) {
-                const file = String.fromCharCode("a".charCodeAt(0) + col);
-                const rank = `${8 - row}`;
-                const kingSquare = `${file}${rank}`;
+                for (let col = 0; col < 8; col++) {
+                    const piece = board[row][col];
+                    if (piece?.type === "k" && piece.color === loserColor) {
+                    const file = String.fromCharCode("a".charCodeAt(0) + col);
+                    const rank = `${8 - row}`;
+                    const kingSquare = `${file}${rank}`;
 
-                setHighlightedSquares({
-                    [kingSquare]: {
-                    backgroundColor: "rgba(255, 0, 0, 0.5)",
-                    },
-                });
+                    setHighlightedSquares({
+                        [kingSquare]: {
+                        backgroundColor: "rgba(255, 0, 0, 0.5)",
+                        },
+                    });
+                    }
                 }
             }
-            }
+        } else if (updatedGame.isDraw()){
+            setIsGameOver(true);
         } else {
             setHighlightedSquares({});
         }
