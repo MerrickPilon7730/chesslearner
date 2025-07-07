@@ -1,5 +1,5 @@
-
 import { HeaderLogo } from "./header-logo";
+import { ThemeToggle } from "../theme-toggle";
 
 export function HeaderWrapper() {
   return (
@@ -9,7 +9,7 @@ export function HeaderWrapper() {
           <HeaderLogo />
         </div>
         <div className="text-white">
-          Other
+          <ThemeToggle />
         </div>
       </div>
     </div>
