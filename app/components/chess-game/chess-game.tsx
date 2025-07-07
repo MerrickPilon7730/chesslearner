@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
+import { ChessResults } from "./chess-results";
 
 type Move = {
   from: string;
@@ -11,7 +12,7 @@ type Move = {
   promotion?: string;
 };
 
-type props ={
+type props = {
     side: "black" | "white";
     game: Chess;
     setGame: (game: Chess) => void;
@@ -23,6 +24,7 @@ type props ={
 export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, difficulty}: props) {
     const [highlightedSquares, setHighlightedSquares] = useState<{[square: string]: React.CSSProperties;}>({});
     const [isProcessingAI, setIsProcessingAI] = useState(false);
+    const [winner, setWinner] = useState<"White" | "Black" | "Draw" | null>(null);
 
     function onSquareClick(square: string) {
         if (isGameOver) return;
@@ -141,8 +143,14 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
 
                     if (aiGameInstance.isCheckmate()) {
                         setIsGameOver(true);
+
+                        const loser = aiGameInstance.turn(); 
+                        const winnerColor = loser === 'w' ? 'Black' : 'White';
+
+                        setWinner(winnerColor);
                     } else if (aiGameInstance.isDraw()){
                         setIsGameOver(true);
+                        setWinner("Draw");
                     }
 
                     checkmate(aiGameInstance);
@@ -178,8 +186,14 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
 
         if (updatedGame.isCheckmate()) {
             setIsGameOver(true);
+
+            const loser = updatedGame.turn(); 
+            const winnerColor = loser === 'w' ? 'Black' : 'White';
+
+            setWinner(winnerColor);
         } else if (updatedGame.isDraw()){
             setIsGameOver(true);
+            setWinner("Draw");
         }
 
         checkmate(updatedGame);
@@ -217,7 +231,10 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         if (updatedGame.isCheckmate()) {
             setIsGameOver(true);
 
-            const loserColor = updatedGame.turn() === "w" ? "b" : "w";
+            const loserColor = updatedGame.turn();
+            const winnerColor = loserColor === 'w' ? 'Black' : 'White';
+
+            setWinner(winnerColor);
             const board = updatedGame.board();
 
             for (let row = 0; row < 8; row++) {
@@ -245,6 +262,12 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         return true;
     }
 
+    function playAgain() {
+        setIsGameOver(false);
+        setWinner(null);
+        setGame(new Chess());
+    }
+
     useEffect(() => {
         if (game.turn() !== side[0]) {
             handleAIMove(game.fen());
@@ -258,7 +281,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
     }, [game]);
 
     return (
-        <div className="w-full max-w-[700px] aspect-square">
+        <div className="relative w-full max-w-[700px] aspect-square">
             <Chessboard
                 position={game.fen()}
                 onPieceDrop={onDrop}
@@ -272,6 +295,10 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
                 boardOrientation={side}
                 arePiecesDraggable={!isGameOver}
             />
+
+            {isGameOver && winner && (
+                <ChessResults winner={winner} reset={playAgain} />
+            )}
         </div>
 
     );
