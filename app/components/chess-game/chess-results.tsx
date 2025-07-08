@@ -1,11 +1,14 @@
 import { Button } from "@/components/ui/button";
 
-
+// Properties for the component
 type Props = {
+    // Winner of the game (White/Black/Draw)
     winner: string;
+    // Function to reset the game state
     reset: () => void;
 }
 
+// Overlay/Modal that displays the winner and a reset/play again button
 export function ChessResults({winner, reset}: Props) {
     return (
         <div className="absolute inset-0 flex items-center justify-center z-50">
