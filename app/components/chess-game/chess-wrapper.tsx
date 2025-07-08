@@ -6,13 +6,20 @@ import { Button } from "@/components/ui/button";
 import { ChessGame } from "./chess-game";
 import { Chess } from "chess.js";
 
+// This component acts as a wrapper for game state and UI controls
 export function ChessWrapper() {
+  // Tracks the player's side (white/black)
   const [side, setSide] = useState<"black" | "white">("white");
+  // Formatted string for the button to switch sides
   const [string, setString] = useState<"Black" | "White">("Black");
+  // Initializes a new chess game instance 
   const [game, setGame] = useState(new Chess());
+  // Tracks if game is over, used for ending/resetting the game
   const [isGameOver, setIsGameOver] = useState(false);
+  // Tracks the current difficulty/depth of Stockfish
   const [difficulty, setDifficulty] = useState(5);
 
+  // Called when player wants to switch sides. It switches sides and resets the game.
   function onClick() {
     setSide(side === "white" ? "black" : "white");
     setString(string === "Black" ? "White" : "Black");
@@ -20,6 +27,7 @@ export function ChessWrapper() {
     setIsGameOver(false);
   }
 
+  // Resets the current game
   function resetGame() {
     setGame(new Chess());
     setIsGameOver(false);
@@ -42,6 +50,7 @@ export function ChessWrapper() {
           >
             Difficulty: {difficulty}
           </label>
+
           <input
             type="range"
             id="difficulty"
@@ -53,6 +62,7 @@ export function ChessWrapper() {
           />
         </div>
       </div>
+      
       <div className="w-full flex justify-center mt-4">
         <ChessGame
           game={game}
@@ -63,6 +73,7 @@ export function ChessWrapper() {
           difficulty={difficulty}
         />
       </div>
+
     </div>
   );
 }
