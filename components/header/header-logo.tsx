@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+// Header for website
 export function HeaderLogo() {
     return(
         <Link href="/">

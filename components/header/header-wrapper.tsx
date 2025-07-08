@@ -1,6 +1,7 @@
 import { HeaderLogo } from "./header-logo";
 import { ThemeToggle } from "../theme-toggle";
 
+// Wrapper for header componenets
 export function HeaderWrapper() {
   return (
     <div className="w-full bg-black py-8">
