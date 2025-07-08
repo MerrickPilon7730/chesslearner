@@ -72,6 +72,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         try {
             const gameCopy = new Chess(game.fen());
             const result = gameCopy.move(move);
+            console.log("Player move:", result.from + result.to);
 
             if (result) return gameCopy;
 
