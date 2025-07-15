@@ -6,7 +6,7 @@
 .dark {
   --background: #262626 !important;
   --foreground: #f9f9f9 !important;
-  --card: #1e293b !important;
+  --card: #262626 !important;
   --card-foreground: #f9f9f9 !important;
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
