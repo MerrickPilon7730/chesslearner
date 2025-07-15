@@ -57,7 +57,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         moves.forEach((move) => {
             // Highlight the destination square
             newHighlights[move.to] = {
-                boxShadow: "inset 0 0 0 10px #baca44",
+                backgroundImage: `radial-gradient(circle at center, #baca44 0px, #baca44 5px, transparent 15px)`,
             };
         });
 
@@ -80,7 +80,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
 
         moves.forEach((move) => {
             newHighlights[move.to] = {
-                boxShadow: "inset 0 0 0 10px #baca44",
+                backgroundImage: `radial-gradient(circle at center, #baca44 0px, #baca44 5px, transparent 15px)`,
             };
         });
 
@@ -370,7 +370,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
     }, [game]);
 
     return (
-        <div className="relative w-full max-w-[700px] aspect-square">
+        <div className="relative w-full max-w-[700px] border-2 aspect-square">
             <Chessboard
                 position={game.fen()}
                 onPieceDrop={onDrop}
