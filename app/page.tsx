@@ -1,3 +1,4 @@
+import { AnalysisWrapper } from "./components/analysis/analysis-wrapper";
 import { ChessWrapper } from "./components/chess-game/chess-wrapper";
 
 export default function Home() {
@@ -8,7 +9,7 @@ export default function Home() {
           <ChessWrapper />
         </div>
         <div className="flex items-center justify-center py-10">
-          Moves History
+          <AnalysisWrapper />
         </div>
       </div>
     </div>
