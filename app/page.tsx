@@ -1,15 +1,21 @@
+"use client"
+
+import { useState } from "react";
 import { AnalysisWrapper } from "./components/analysis/analysis-wrapper";
 import { ChessWrapper } from "./components/chess-game/chess-wrapper";
 
 export default function Home() {
+  // Tracks all moves made
+  const [moveHistory, setMoveHistory] = useState<string[][]>([]);
+
   return (
     <div className="flex items-center justify-center">
       <div className="grid grid-cols-1 md:grid-cols-2 w-[90%]">
         <div className="flex items-center justify-center py-10">
-          <ChessWrapper />
+          <ChessWrapper setMoveHistory={setMoveHistory}/>
         </div>
         <div className="flex items-center justify-center py-10">
-          <AnalysisWrapper />
+          <AnalysisWrapper moveHistory={moveHistory}/>
         </div>
       </div>
     </div>
