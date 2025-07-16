@@ -27,9 +27,11 @@ type props = {
     setIsGameOver: (over: boolean) => void;
     // Difficulty/depth for Stockfish
     difficulty: number;
+    // Tracks all moves made
+    setMoveHistory: React.Dispatch<React.SetStateAction<string[][]>>;
 }
 
-export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, difficulty}: props) {
+export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, difficulty, setMoveHistory}: props) {
     // Highlights legal moves or checkmates
     const [highlightedSquares, setHighlightedSquares] = useState<{[square: string]: React.CSSProperties;}>({});
     // Controls whether an AI move is in progress
@@ -186,6 +188,21 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
                     // Update game state with move from Stockfish
                     setGame(aiGameInstance);
 
+                    const lastMove = aiGameInstance.history({ verbose: true }).at(-1);
+                    if (lastMove) {
+                        setMoveHistory((prev) => {
+                            const newHistory = [...prev];
+                            if (lastMove.color === "w") {
+                                newHistory.push([lastMove.san]);
+                            } else {
+                            const last = newHistory.pop() || [""];
+                                last[1] = lastMove.san;
+                                newHistory.push(last);
+                            }
+                            return newHistory;
+                        });
+                    }
+
                     // Check for chekmate afterStockfish moves
                     if (aiGameInstance.isCheckmate()) {
                         setIsGameOver(true);
@@ -214,7 +231,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
             // Clear AI processing flag
             setIsProcessingAI(false);
         }
-    }, [side, checkmate, setGame, setIsGameOver, difficulty, isProcessingAI]);
+    }, [side, checkmate, setGame, setIsGameOver, difficulty, isProcessingAI, setMoveHistory]);
 
     // Handles the logic when a piece is dropped on target square 
     function onDrop(sourceSquare: string, targetSquare: string): boolean {
@@ -244,6 +261,23 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         setGame(updatedGame);
         // Clear any highlighted squares
         setHighlightedSquares({});
+
+        const lastMove = updatedGame.history({ verbose: true }).at(-1);
+        if (lastMove) {
+            setMoveHistory((prev) => {
+                const newHistory = [...prev];
+                if (lastMove.color === "w") {
+                    // White's turn, start a new row
+                    newHistory.push([lastMove.san]);
+                } else {
+                    // Black's turn, update last row
+                    const last = newHistory.pop() || [""];
+                    last[1] = lastMove.san;
+                    newHistory.push(last);
+                }
+                return newHistory;
+            });
+        }
 
         // Check for checkmate
         if (updatedGame.isCheckmate()) {
@@ -352,6 +386,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         setIsGameOver(false);
         setWinner(null);
         setGame(new Chess());
+        setMoveHistory([]);
     }
 
     // useEffect to trigger the AI move

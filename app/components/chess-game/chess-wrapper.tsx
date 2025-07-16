@@ -6,8 +6,12 @@ import { Button } from "@/components/ui/button";
 import { ChessGame } from "./chess-game";
 import { Chess } from "chess.js";
 
+type Props = {
+  setMoveHistory: React.Dispatch<React.SetStateAction<string[][]>>;
+};
+
 // This component acts as a wrapper for game state and UI controls
-export function ChessWrapper() {
+export function ChessWrapper({setMoveHistory}: Props) {
   // Tracks the player's side (white/black)
   const [side, setSide] = useState<"black" | "white">("white");
   // Formatted string for the button to switch sides
@@ -71,6 +75,7 @@ export function ChessWrapper() {
           isGameOver={isGameOver}
           setIsGameOver={setIsGameOver}
           difficulty={difficulty}
+          setMoveHistory={setMoveHistory}
         />
       </div>
 
