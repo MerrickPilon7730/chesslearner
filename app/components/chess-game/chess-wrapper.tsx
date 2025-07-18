@@ -29,17 +29,19 @@ export function ChessWrapper({setMoveHistory}: Props) {
     setString(string === "Black" ? "White" : "Black");
     setGame(new Chess());
     setIsGameOver(false);
+    setMoveHistory([]);
   } 
 
   // Resets the current game
   function resetGame() {
     setGame(new Chess());
     setIsGameOver(false);
+    setMoveHistory([]);
   }
 
   return (
     <div className="w-full flex flex-col justify-center items-center px-4">
-      <div className="w-full flex justify-start px-4 gap-4">
+      <div className="w-full flex justify-center px-4 gap-4">
         <Button variant="default" onClick={onClick}>
           Play As {string}
         </Button>
