@@ -405,7 +405,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
     }, [game]);
 
     return (
-        <div className="relative w-full max-w-[700px] border-2 aspect-square">
+        <div className="relative w-full max-w-[700px] border-2 dark:border-2 aspect-square">
             <Chessboard
                 position={game.fen()}
                 onPieceDrop={onDrop}
