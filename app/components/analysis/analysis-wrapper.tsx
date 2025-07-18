@@ -15,7 +15,7 @@ export function AnalysisWrapper({ moveHistory }: Props) {
     return (
         <Card className="w-full h-full">
             <CardHeader className="flex items-center justify-center">
-                <CardTitle className="text-2xl text-white">
+                <CardTitle className="text-2xl">
                     Analysis
                 </CardTitle>
             </CardHeader>
