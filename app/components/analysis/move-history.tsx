@@ -16,7 +16,7 @@ export function MoveHistory({moveHistory}: Props){
 
     return(
         <div className="w-[90%]">
-            <div className="grid grid-cols-3 text-center bg-zinc-500 min-h-[30px] font-bold">
+            <div className="grid grid-cols-3 text-center dark:bg-zinc-500 bg-blue-800 min-h-[30px] font-bold text-white">
                 <p>Turn #</p>
                 <p>White</p>
                 <p>Black</p>
@@ -28,7 +28,7 @@ export function MoveHistory({moveHistory}: Props){
                 <table className="w-full text-white text-sm table-fixed border-separate border-spacing-0">
                     <tbody>
                         {moveHistory.map(([white, black], index) => (
-                            <tr key={index} className="border-2 border-zinc-800 odd:bg-zinc-800 even:bg-zinc-700 text-center">
+                            <tr key={index} className="border-2 dark:odd:bg-zinc-800 dark:even:bg-zinc-700 odd:bg-blue-400 even:bg-blue-300 text-center">
                                 <td className="p-2">{index + 1}</td>
                                 <td className="p-2">{white}</td>
                                 <td className="p-2">{black}</td>
