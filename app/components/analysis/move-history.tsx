@@ -14,6 +14,8 @@ export function MoveHistory({moveHistory}: Props){
         }
     }, [moveHistory])
 
+    const emptyRowsCount = Math.max(0, 10 - moveHistory.length);
+
     return(
         <div className="w-[90%]">
             <div className="grid grid-cols-3 text-center dark:bg-zinc-500 bg-blue-800 min-h-[30px] font-bold text-white">
@@ -34,6 +36,19 @@ export function MoveHistory({moveHistory}: Props){
                                 <td className="p-2">{black}</td>
                             </tr>
                         ))}
+
+                        {Array.from({ length: emptyRowsCount }).map((_, i) => {
+                            return (
+                                <tr
+                                    key={`empty-${i}`}
+                                    className="border-2 dark:odd:bg-zinc-800 dark:even:bg-zinc-700 odd:bg-blue-400 even:bg-blue-300 text-center"
+                                >
+                                    <td className="p-2"></td>
+                                    <td className="p-2">&nbsp;</td>
+                                    <td className="p-2">&nbsp;</td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>
