@@ -37,7 +37,7 @@
   --sidebar-ring: oklch(0.556 0 0);
   --button-bg: var(--primary);
   --button-text: var(--primary-foreground);
-  --button-hover-bg: rgba(249, 249, 249, 0.8); 
+  --label-color: var(--primary-foreground);
 }
 
 body {
@@ -117,7 +117,7 @@ body {
   --sidebar-ring: oklch(0.708 0 0);
   --button-bg: var(--primary);
   --button-text: var(--primary-foreground);
-  --button-hover-bg: rgba(249, 249, 249, 0.8); 
+  --label-color: var(--primary-foreground);
 }
 
 @layer base {
