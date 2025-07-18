@@ -29,7 +29,7 @@ export function ChessWrapper({setMoveHistory}: Props) {
     setString(string === "Black" ? "White" : "Black");
     setGame(new Chess());
     setIsGameOver(false);
-  }
+  } 
 
   // Resets the current game
   function resetGame() {
@@ -50,7 +50,7 @@ export function ChessWrapper({setMoveHistory}: Props) {
         <div className="flex items-center w-64 gap-2">
           <label
             htmlFor="difficulty"
-            className="text-md text-white whitespace-nowrap "
+            className="text-md whitespace-nowrap "
           >
             Difficulty: {difficulty}
           </label>
