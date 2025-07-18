@@ -13,7 +13,7 @@ type Props = {
 
 export function AnalysisWrapper({ moveHistory }: Props) {
     return (
-        <Card className="w-full h-full bg-zinc-900">
+        <Card className="w-full h-full">
             <CardHeader className="flex items-center justify-center">
                 <CardTitle className="text-2xl text-white">
                     Analysis
