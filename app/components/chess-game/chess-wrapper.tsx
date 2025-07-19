@@ -31,6 +31,20 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 	const flatMoveHistory = useMemo(() => moveHistory.flat(), [moveHistory]);
 	// Uses flatMoveHistory to keep track of pieces captured
 	const {whiteCaptured, blackCaptured} = useCapturedPieces(flatMoveHistory);
+	// Gives each piece a number value
+	const pieceValues: Record<string, number> = {
+		p: 1, n: 3, b: 3, r: 5, q: 9,
+	};
+
+	function calcPoints(pieces: string[]) {
+		return pieces.reduce((acc, p) => acc + (pieceValues[p.toLowerCase()] ?? 0), 0);
+	}
+
+	const whiteScore = calcPoints(whiteCaptured);
+	const blackScore = calcPoints(blackCaptured);
+
+	const showWhiteScore = whiteScore > blackScore;
+	const showBlackScore = blackScore > whiteScore;
 
 	// Called when player wants to switch sides. It switches sides and resets the game.
 	function onClick() {
@@ -78,8 +92,12 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 				</div>
 			</div>
 			
-			<div className="w-full flex justify-center mt-4">
-				<BlackCapturedPieces pieces={blackCaptured}/>
+			<div className="w-full flex justify-center mt-4 gap-x-1">
+				<BlackCapturedPieces 
+					pieces={blackCaptured}
+					showScore={showBlackScore}
+					score={blackScore - whiteScore}
+				/>
 				<ChessGame
 					game={game}
 					setGame={setGame}
@@ -88,8 +106,12 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 					setIsGameOver={setIsGameOver}
 					difficulty={difficulty}
 					setMoveHistory={setMoveHistory}
-					/>
-					<WhiteCapturedPieces pieces={whiteCaptured}/>
+				/>
+				<WhiteCapturedPieces 
+					pieces={whiteCaptured}
+					showScore={showWhiteScore}
+					score={whiteScore - blackScore}
+				/>
 			</div>
 
 		</div>
