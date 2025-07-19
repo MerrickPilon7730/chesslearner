@@ -5,13 +5,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChessGame } from "./chess-game";
 import { Chess } from "chess.js";
+import { CapturedPieces } from "./captured-pieces";
 
 type Props = {
   setMoveHistory: React.Dispatch<React.SetStateAction<string[][]>>;
+  moveHistory: string[][];
 };
 
 // This component acts as a wrapper for game state and UI controls
-export function ChessWrapper({setMoveHistory}: Props) {
+export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
   // Tracks the player's side (white/black)
   const [side, setSide] = useState<"black" | "white">("white");
   // Formatted string for the button to switch sides
@@ -79,6 +81,7 @@ export function ChessWrapper({setMoveHistory}: Props) {
           difficulty={difficulty}
           setMoveHistory={setMoveHistory}
         />
+		<CapturedPieces moveHistory={moveHistory.flat()}/>
       </div>
 
     </div>
