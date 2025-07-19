@@ -12,7 +12,7 @@ export default function Home() {
     <div className="flex items-center justify-center">
       <div className="grid grid-cols-1 md:grid-cols-2 w-[90%]">
         <div className="flex items-center justify-center py-5">
-          <ChessWrapper setMoveHistory={setMoveHistory}/>
+          <ChessWrapper setMoveHistory={setMoveHistory} moveHistory={moveHistory}/>
         </div>
         <div className="flex items-center justify-center py-5">
           <AnalysisWrapper moveHistory={moveHistory}/>
