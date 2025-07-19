@@ -18,7 +18,7 @@ type Props = {
 
 export function BlackCapturedPieces({ pieces, showScore, score }: Props) {
 	return (
-		<div className="flex flex-col items-center px-1 min-w-[40px]">
+		<div className="flex flex-col items-center min-w-[40px]">
 			{pieces.map((p, i) => (
 				<Image
 					key={i}
