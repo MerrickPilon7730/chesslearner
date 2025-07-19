@@ -1,5 +1,6 @@
 
 import React from "react";
+import Image from "next/image";
 
 const pieceImages: Record<string, string> = {
   P: "https://chessboardjs.com/img/chesspieces/wikipedia/wP.png",
@@ -17,13 +18,14 @@ type Props = {
 
 export function BlackCapturedPieces({ pieces, showScore, score }: Props) {
 	return (
-		<div className="flex flex-col items-center">
+		<div className="flex flex-col items-center px-1">
 			{pieces.map((p, i) => (
-				<img
+				<Image
 					key={i}
 					src={pieceImages[p]}
 					alt={p}
-					className="w-6 h-6"
+					width={30}
+					height={30}
 				/>
 			))}
 			{showScore && score > 0 && (
