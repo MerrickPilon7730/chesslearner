@@ -1,23 +1,34 @@
 
 import React from "react";
 
-const pieceUnicode: Record<string, string> = {
-	p: "♙", n: "♘", b: "♗", r: "♖", q: "♕",
-	P: "♙", N: "♘", B: "♗", R: "♖", Q: "♕"
+const pieceImages: Record<string, string> = {
+  p: "https://chessboardjs.com/img/chesspieces/wikipedia/bP.png",
+  n: "https://chessboardjs.com/img/chesspieces/wikipedia/bN.png",
+  b: "https://chessboardjs.com/img/chesspieces/wikipedia/bB.png",
+  r: "https://chessboardjs.com/img/chesspieces/wikipedia/bR.png",
+  q: "https://chessboardjs.com/img/chesspieces/wikipedia/bQ.png",
 };
 
 type Props = {
 	pieces: string[];
+	showScore: boolean;
+	score: number;
 };
 
-export function WhiteCapturedPieces({ pieces }: Props) {
+export function WhiteCapturedPieces({ pieces, showScore, score }: Props) {
 	return (
-		<div className="flex flex-col">
+		<div className="flex flex-col items-center">
 			{pieces.map((p, i) => (
-				<span key={i} className="text-2xl text-black dark:text-gray-400">
-					{pieceUnicode[p.toUpperCase()]}
-				</span>
+				<img
+					key={i}
+					src={pieceImages[p]}
+					alt={p}
+					className="w-6 h-6"
+				/>
 			))}
-		</div>
+			{showScore && score > 0 && (
+				<p>+{score}</p>
+			)}
+		</div> 
 	);
 }
