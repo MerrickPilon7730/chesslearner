@@ -2,7 +2,6 @@
 import { 
     Card,
     CardHeader,
-    CardTitle,
     CardContent,
 } from "@/components/ui/card"
 import { MoveHistory } from "./move-history";
@@ -17,9 +16,6 @@ export function AnalysisWrapper({ moveHistory }: Props) {
     return (
         <Card className="w-full h-full">
             <CardHeader className="flex items-center justify-center">
-                <CardTitle className="text-2xl">
-                    Analysis
-                </CardTitle>
             </CardHeader>
             <CardContent className="w-full flex flex-col justify-center items-center">
                 <Opening moveHistory={moveHistory.flat()}/>
