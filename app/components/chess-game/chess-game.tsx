@@ -59,7 +59,8 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         moves.forEach((move) => {
             // Highlight the destination square
             newHighlights[move.to] = {
-                backgroundImage: `radial-gradient(circle at center, #baca44 0px, #baca44 5px, transparent 15px)`,
+                boxShadow: "inset 0 0 0 5px #baca44",
+                backgroundColor: "transparent", 
             };
         });
 
