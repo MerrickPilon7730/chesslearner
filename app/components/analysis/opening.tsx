@@ -12,7 +12,7 @@ export function Opening({moveHistory}: Props){
         <div className="w-[90%] mb-10">
             <p className="flex justify-center text-2xl font-bold mb-2">Opening</p>
             <p className="flex justify-center bg-blue-800 dark:bg-zinc-500 text-lg">
-                {openingName ?? ""}
+                {openingName.trim() === "" ? <>&nbsp;</> : openingName}
             </p>
         </div>
     )
