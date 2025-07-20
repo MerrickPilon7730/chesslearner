@@ -10,8 +10,9 @@ export function Opening({moveHistory}: Props){
 
     return(
         <div className="w-[90%] mb-10">
-            <p className="flex justify-center bg-blue-800 dark:bg-zinc-500 text-xl">
-                <b className="mr-2">Opening:</b>{openingName ?? ""}
+            <p className="flex justify-center text-2xl font-bold mb-2">Opening</p>
+            <p className="flex justify-center bg-blue-800 dark:bg-zinc-500 text-lg">
+                {openingName ?? ""}
             </p>
         </div>
     )
