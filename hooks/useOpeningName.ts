@@ -26,6 +26,6 @@ export function useOpeningName(moveHistory: string[]) {
       		}
     	}
 
-    	return bestMatch?.name ?? "Unknown Opening";
+    	return bestMatch?.name ?? " ";
   	}, [moveHistory]);
 }
