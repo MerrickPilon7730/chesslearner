@@ -17,9 +17,9 @@ export function MoveHistory({moveHistory}: Props){
     const emptyRowsCount = Math.max(0, 10 - moveHistory.length);
 
     return(
-        <div className="w-[90%]">
+        <div className="w-[90%] text-white">
             <div className="flex justify-center text-2xl font-bold mb-2">Move History</div>
-            <div className="grid grid-cols-3 text-center dark:bg-zinc-500 bg-blue-800 min-h-[30px] font-bold text-white">
+            <div className="grid grid-cols-3 text-center dark:bg-zinc-500 bg-blue-800 min-h-[30px] font-bold">
                 <p>Turn #</p>
                 <p>White</p>
                 <p>Black</p>
