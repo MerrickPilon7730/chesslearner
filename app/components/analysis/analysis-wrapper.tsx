@@ -12,7 +12,6 @@ type Props = {
 };
 
 export function AnalysisWrapper({ moveHistory }: Props) {
-    console.log("Flat moveHistory:", moveHistory.flat());
     return (
         <Card className="w-full h-full">
             <CardHeader className="flex items-center justify-center">
