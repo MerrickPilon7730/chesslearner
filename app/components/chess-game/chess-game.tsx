@@ -32,8 +32,10 @@ type props = {
 }
 
 export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, difficulty, setMoveHistory}: props) {
-    // Highlights legal moves or checkmates
-    const [highlightedSquares, setHighlightedSquares] = useState<{[square: string]: React.CSSProperties;}>({});
+    // Highlights legal moves 
+    const [legalMoveHighlights, setLegalMoveHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
+    // Highlights check/mates
+    const [checkhighlights, setCheckHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
     // Controls whether an AI move is in progress
     const [isProcessingAI, setIsProcessingAI] = useState(false);
     // Holds the winner for displaying game results
@@ -53,7 +55,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
 
         // If no legal moves for a piece clear the highlighted squares
         if (moves.length === 0) {
-            setHighlightedSquares({});
+            setLegalMoveHighlights({});
             return;
         }
 
@@ -70,7 +72,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         });
 
         // Set the highlighted squares
-        setHighlightedSquares(newHighlights);
+        setLegalMoveHighlights(newHighlights);
     }
 
     // Same as onSquareClick but starts when a piece is being dragged
@@ -80,7 +82,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         const moves = game.moves({square: sourceSquare as Square, verbose: true,}) as Array<{ to: string }>;
 
         if (moves.length === 0) {
-            setHighlightedSquares({});
+            setLegalMoveHighlights({});
             return;
         }
 
@@ -93,7 +95,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
             };
         });
 
-        setHighlightedSquares(newHighlights);
+        setLegalMoveHighlights(newHighlights);
     }
 
     // Handles the player making a move and returns the updated game state is valid
@@ -119,40 +121,48 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
     }
 
     // Highlights the king's square red when checkmated
-    const checkmate = useCallback((gameInstance: Chess) => {
-        // If the game is in checkmate state
-        if (gameInstance.isCheckmate()) {
+    const kingThreats = useCallback((gameInstance: Chess) => {
+        // Get the current board layout as a 2D array
+        const board = gameInstance.board();
+        // Check if king is in check
+        const isCheck = gameInstance.inCheck();
+        // Check if king is mated
+        const isMate = gameInstance.isCheckmate();
 
-            // Get the turn of the player of who's turn it is (white/black, they are the loser in checkmate)
-            const loser = gameInstance.turn(); 
-            // Get the current board layout as a 2D array
-            const board = gameInstance.board();
-
-            // Loop through each square on the board
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const piece = board[row][col];
-                    
-                    // Find the Checkmated King
-                    if (piece?.type === "k" && piece.color === loser) {
-                        // Convert board indicies to board positions (e.g. e1, d4 etc.)
-                        const file = String.fromCharCode("a".charCodeAt(0) + col);
-                        const rank = `${8 - row}`;
-                        const kingSquare = `${file}${rank}`;
-
-                        // Highlight the checkmated king's square in red
-                        setHighlightedSquares({
-                            [kingSquare]: {
-                            backgroundColor: "rgba(255, 0, 0, 0.5)",
-                            },
-                        });
-                        return; 
-                    }
+        // Determine the threatened king
+        const kingColor = gameInstance.turn();
+        let kingSquare: string | null = null;
+            
+        // Loop through each square on the board
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                const piece = board[row][col];
+                if (piece?.type === "k" && piece.color === kingColor) {
+                    const file = String.fromCharCode("a".charCodeAt(0) + col);
+                    const rank = `${8 - row}`;
+                    kingSquare = `${file}${rank}`;
+                    break;
                 }
             }
-        } else {
-            // If not checkmated clear all highlights
-            setHighlightedSquares({});
+        }
+
+        // If no check/mate clear highlighted squares
+        if (!isCheck && !isMate) {
+            setCheckHighlights({});
+            return;
+        }
+
+        if (kingSquare) {
+            const highlightStyle = isMate
+                ? { backgroundColor: "rgba(255, 0, 0, 0.6)" } 
+                : {
+                    boxShadow: "inset 0 0 0 5px rgba(255, 0, 0, 0.6)",
+                    backgroundColor: "transparent", 
+                };
+
+            setCheckHighlights({
+                [kingSquare]: highlightStyle,
+            });
         }
     }, []);
 
@@ -225,7 +235,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
                     }
 
                     // Highlight losing king
-                    checkmate(aiGameInstance);
+                    kingThreats(aiGameInstance);
                 } else {
                     // Log illegal moves
                     console.warn("AI move was invalid for current position:", bestMove);
@@ -238,7 +248,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
             // Clear AI processing flag
             setIsProcessingAI(false);
         }
-    }, [side, checkmate, setGame, setIsGameOver, difficulty, isProcessingAI, setMoveHistory]);
+    }, [side, kingThreats, setGame, setIsGameOver, difficulty, isProcessingAI, setMoveHistory]);
 
     // Handles the logic when a piece is dropped on target square 
     function onDrop(sourceSquare: string, targetSquare: string): boolean {
@@ -267,7 +277,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         // Update the game state
         setGame(updatedGame);
         // Clear any highlighted squares
-        setHighlightedSquares({});
+        setLegalMoveHighlights({});
 
         const lastMove = updatedGame.history({ verbose: true }).at(-1);
         if (lastMove) {
@@ -301,7 +311,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         }
 
         // Call Checkmate function to handle that logic
-        checkmate(updatedGame);
+        kingThreats(updatedGame);
 
         // Trigger the AI move 
         if (updatedGame.turn() !== side[0]) {
@@ -345,43 +355,16 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         // Update the game state
         setGame(updatedGame);
 
-        // Handle checkmate on promotion
+        // Check for king threats check/mate
+        kingThreats(updatedGame);
+
         if (updatedGame.isCheckmate()) {
             setIsGameOver(true);
-
-            // Determine the winner
             const loserColor = updatedGame.turn();
-            const winnerColor = loserColor === 'w' ? 'Black' : 'White';
-
+            const winnerColor = loserColor === "w" ? "Black" : "White";
             setWinner(winnerColor);
-            // Get current board layout
-            const board = updatedGame.board();
-
-             // Loop through the board to find the losing king's position
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const piece = board[row][col];
-                    if (piece?.type === "k" && piece.color === loserColor) {
-                         // Convert row/col to algebraic notation (e.g., "e1")
-                        const file = String.fromCharCode("a".charCodeAt(0) + col);
-                        const rank = `${8 - row}`;
-                        const kingSquare = `${file}${rank}`;
-
-                        // Highlight the losing king’s square in red
-                        setHighlightedSquares({
-                            [kingSquare]: {
-                                backgroundColor: "rgba(255, 0, 0, 0.5)",
-                            },
-                        });
-                    }
-                }
-            }
-        // Handle Draw
-        } else if (updatedGame.isDraw()){
+        } else if (updatedGame.isDraw()) {
             setIsGameOver(true);
-        // No game-ending condition, just clear highlights
-        } else {
-            setHighlightedSquares({});
         }
 
         // Promotion successful
@@ -404,6 +387,8 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         setWinner(null);
         setGame(new Chess());
         setMoveHistory([]);
+        setCheckHighlights({});
+        setLegalMoveHighlights({});
     }
 
     // useEffect to trigger the AI move
@@ -414,12 +399,15 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         }
     }, [side, game, handleAIMove]);
 
-    // useEffect to clear highlights if the game is not in checkmate
+    // useEffect to clear highlights if the game is not in check/mate
     useEffect(() => {
-        if (!game.isCheckmate()) {
-            setHighlightedSquares({});
+        if (game.isCheckmate() || game.isCheck()) {
+            kingThreats(game);
         }
-    }, [game]);
+        else{
+            setLegalMoveHighlights({});
+        }
+    }, [game, kingThreats]);
 
     return (
         <div className="relative w-full max-w-[700px] border-2 dark:border-2 aspect-square">
@@ -430,7 +418,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
                 onPieceDragBegin={onPieceDragBegin}
                 onPromotionCheck={onPromotionCheck}
                 onPromotionPieceSelect={onPromotionPieceSelect}
-                customSquareStyles={highlightedSquares}
+                customSquareStyles={{...legalMoveHighlights, ...checkhighlights}}
                 areArrowsAllowed={true}
                 showBoardNotation={true}
                 boardOrientation={side}
