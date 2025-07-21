@@ -39,9 +39,14 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
     // Holds the winner for displaying game results
     const [winner, setWinner] = useState<"White" | "Black" | "Draw" | null>(null);
 
+    function isPlayerPiece(square: Square): boolean {
+        const piece = game.get(square);
+        return piece?.color === side[0];
+    }
+
     // Shows legal moves for piece that is clicked
     function onSquareClick(square: string) {
-        if (isGameOver) return;
+        if (isGameOver || !isPlayerPiece(square as Square)) return;
 
         // An array of legal moves
         const moves = game.moves({square: square as Square, verbose: true,}) as Array<{ to: string }>;
@@ -70,7 +75,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
 
     // Same as onSquareClick but starts when a piece is being dragged
     function onPieceDragBegin(piece: string, sourceSquare: string) {
-        if (isGameOver) return;
+        if (isGameOver || !isPlayerPiece(sourceSquare as Square)) return;
 
         const moves = game.moves({square: sourceSquare as Square, verbose: true,}) as Array<{ to: string }>;
 
@@ -383,6 +388,16 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
         return true;
     }
 
+    function canDragPiece({ piece }: { piece: string }): boolean {
+        if (isGameOver) return false;
+
+        const currentTurn = game.turn(); 
+        const pieceColor = piece[0];     
+
+        return pieceColor === side[0] && currentTurn === side[0];
+    }
+
+
     // Resets game state to allow a new game and initializes a new game instance
     function playAgain() {
         setIsGameOver(false);
@@ -420,6 +435,7 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
                 showBoardNotation={true}
                 boardOrientation={side}
                 arePiecesDraggable={!isGameOver}
+                isDraggablePiece={canDragPiece}
             />
 
             {isGameOver && winner && (
