@@ -71,25 +71,9 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 				<Button variant="default" onClick={resetGame}>
 					Reset
 				</Button>
-
-				<div className="flex items-center w-64 gap-2">
-					<label
-						htmlFor="difficulty"
-						className="text-md whitespace-nowrap "
-					>
-						Difficulty: {difficulty}
-					</label>
-
-					<input
-						type="range"
-						id="difficulty"
-						min={1}
-						max={20}
-						value={difficulty}
-						onChange={(e) => setDifficulty(Number(e.target.value))}
-						className="flex-1"
-					/>
-				</div>
+				<p className="flex items-center">
+					<b className="mr-1">Difficulty:</b> {difficulty}
+				</p>
 			</div>
 			
 			<div className="w-full flex justify-center mt-4 gap-x-1">
@@ -106,6 +90,7 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 					setIsGameOver={setIsGameOver}
 					difficulty={difficulty}
 					setMoveHistory={setMoveHistory}
+					setDifficulty={setDifficulty}
 				/>
 				<WhiteCapturedPieces 
 					pieces={whiteCaptured}
