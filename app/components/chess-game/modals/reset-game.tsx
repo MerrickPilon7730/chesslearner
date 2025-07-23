@@ -28,11 +28,9 @@ export function ResetGame({onConfirm, onCancel}: Props) {
 					<Button onClick={onConfirm} className="px-4 py-2 rounded transition">
 						Yes
 					</Button>
-					{onCancel && (
-						<Button onClick={onCancel} className="px-4 py-2 rounded transition">
-							Cancel
-						</Button>
-					)}
+					<Button onClick={onCancel} className="px-4 py-2 rounded transition">
+						Cancel
+					</Button>
 				</CardContent>
             </Card>
         </div>
