@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
-import { ChessResults } from "./chess-results";
-import { ChessStart } from "./chess-start";
-import { PlayAs } from "./play-as";
+import { ChessResults } from "./modals/chess-results";
+import { ChessStart } from "./modals/chess-start";
+import { PlayAs } from "./modals/play-as";
 
 // Move type (Moving pieces from, to and optional promotion for pawns)
 type Move = {
