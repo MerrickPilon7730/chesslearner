@@ -5,6 +5,7 @@ import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
 import { ChessResults } from "./chess-results";
+import { ChessStart } from "./chess-start";
 
 // Move type (Moving pieces from, to and optional promotion for pawns)
 type Move = {
@@ -42,6 +43,8 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
     const [isProcessingAI, setIsProcessingAI] = useState(false);
     // Holds the winner for displaying game results
     const [winner, setWinner] = useState<"White" | "Black" | "Draw" | null>(null);
+    // Used for the starting prompt for difficulty
+    const [gameStart, setGameStart] = useState(true);
 
     function isPlayerPiece(square: Square): boolean {
         const piece = game.get(square);
@@ -434,6 +437,14 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
                     reset={playAgain}
                     difficulty={difficulty}
                     setDifficulty={setDifficulty} 
+                />
+            )}
+
+            {gameStart && (
+                <ChessStart 
+                setGameStart={setGameStart} 
+                difficulty={difficulty}
+                setDifficulty={setDifficulty}
                 />
             )}
         </div>
