@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
+
 import { ChessResults } from "./modals/chess-results";
 import { ChessStart } from "./modals/chess-start";
 import { PlayAs } from "./modals/play-as";
@@ -290,6 +291,7 @@ export function ChessGame({
             console.error("AI move failed:", err);
         } finally {
             // Clear AI processing flag
+            console.log("AI processing finished.");
             setIsProcessingAI(false);
         }
     }, [side, kingThreats, setGame, setIsGameOver, difficulty, isProcessingAI, setMoveHistory]);
