@@ -8,6 +8,7 @@ import { ChessResults } from "./modals/chess-results";
 import { ChessStart } from "./modals/chess-start";
 import { PlayAs } from "./modals/play-as";
 import { ResetGame } from "./modals/reset-game";
+import { ChangeDifficulty } from "./modals/change-difficulty";
 
 // Move type (Moving pieces from, to and optional promotion for pawns)
 type Move = {
@@ -46,6 +47,12 @@ type props = {
     resetGameConfirm: () => void;
     // Function to handle devlining of resetting the game
     resetGameCancel: () => void;
+    // Boolean for showing change difficulty modal 
+    showChangeDifficulty: boolean;
+    // Function to handle confirmation of difficulty change
+    changeDifficultyConfirm: () => void;
+    // Function to handle declining difficulty change
+    changeDifficultyCancel: () => void;
 }
 
 export function ChessGame({
@@ -63,6 +70,9 @@ export function ChessGame({
     showResetGame,
     resetGameConfirm,
     resetGameCancel,
+    showChangeDifficulty,
+    changeDifficultyConfirm, 
+    changeDifficultyCancel
 }: props) {
     // Highlights legal moves 
     const [legalMoveHighlights, setLegalMoveHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
@@ -414,7 +424,6 @@ export function ChessGame({
         return pieceColor === side[0] && currentTurn === side[0];
     }
 
-
     // Resets game state to allow a new game and initializes a new game instance
     function playAgain() {
         setIsGameOver(false);
@@ -488,6 +497,15 @@ export function ChessGame({
                 <ResetGame 
                     onConfirm={resetGameConfirm}
                     onCancel={resetGameCancel}
+                />
+            )}
+
+            {showChangeDifficulty && (
+                <ChangeDifficulty 
+                    onConfirm={changeDifficultyConfirm}
+                    onCancel={changeDifficultyCancel}
+                    difficulty={difficulty}
+                    setDifficulty={setDifficulty}
                 />
             )}
         </div>
