@@ -7,6 +7,7 @@ import type { Square } from "chess.js";
 import { ChessResults } from "./modals/chess-results";
 import { ChessStart } from "./modals/chess-start";
 import { PlayAs } from "./modals/play-as";
+import { ResetGame } from "./modals/reset-game";
 
 // Move type (Moving pieces from, to and optional promotion for pawns)
 type Move = {
@@ -39,9 +40,30 @@ type props = {
     switchSidesConfirm: () => void;
     // Function to handle declining of switching color/sides
     switchSidesCancel: () => void;
+    // Boolean for showing the reset game modal
+    showResetGame: boolean;
+    // Function to handle confirmation of reseting the game
+    resetGameConfirm: () => void;
+    // Function to handle devlining of resetting the game
+    resetGameCancel: () => void;
 }
 
-export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, difficulty, setDifficulty, setMoveHistory, showSwitchSides, switchSidesConfirm, switchSidesCancel}: props) {
+export function ChessGame({
+    side, 
+    game, 
+    setGame, 
+    isGameOver, 
+    setIsGameOver, 
+    difficulty, 
+    setDifficulty, 
+    setMoveHistory, 
+    showSwitchSides, 
+    switchSidesConfirm, 
+    switchSidesCancel,
+    showResetGame,
+    resetGameConfirm,
+    resetGameCancel,
+}: props) {
     // Highlights legal moves 
     const [legalMoveHighlights, setLegalMoveHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
     // Highlights check/mates
@@ -461,6 +483,13 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
 					onCancel={switchSidesCancel}
 				/>
 			)}
+
+            {showResetGame && (
+                <ResetGame 
+                    onConfirm={resetGameConfirm}
+                    onCancel={resetGameCancel}
+                />
+            )}
         </div>
 
     );
