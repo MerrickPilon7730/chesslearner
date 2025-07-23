@@ -39,6 +39,8 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 	const [showSwitchSides, setShowSwitchSides] =  useState(false);
 	// Show modal for resetting game
 	const [showResetGame, setShowResetGame] = useState(false);
+	// Show modal for changing game difficulty
+	const [showChangeDifficulty, setShowChangeDifficulty] = useState(false);
 
 	function calcPoints(pieces: string[]) {
 		return pieces.reduce((acc, p) => acc + (pieceValues[p.toLowerCase()] ?? 0), 0);
@@ -64,12 +66,10 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 	function switchSides() {
 		setSide(side === "white" ? "black" : "white");
 		setString(string === "Black" ? "White" : "Black");
-		setGame(new Chess());
-		setIsGameOver(false);
-		setMoveHistory([]);
-		setShowSwitchSides(false);
+		newGame()
 	}
 
+	// Called when player wants to reset game
 	function reset() {
 		if (moveHistory.flat().length > 1){
 			setShowResetGame(true);
@@ -85,6 +85,13 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 		setIsGameOver(false);
 		setMoveHistory([]);
 		setShowResetGame(false);
+		setShowSwitchSides(false);
+		setShowChangeDifficulty(false);
+	}
+
+	// Called when player wants to change difficulty
+	function ChangeDifficulty() {
+		setShowChangeDifficulty(true);
 	}
 
 	return (
@@ -95,6 +102,9 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 				</Button>
 				<Button variant="default" onClick={reset}>
 					Reset
+				</Button>
+				<Button variant="default" onClick={ChangeDifficulty}>
+					Difficulty
 				</Button>
 				<p className="flex items-center">
 					<b className="mr-1">Difficulty:</b> {difficulty}
@@ -122,6 +132,9 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 					showResetGame={showResetGame}
 					resetGameConfirm={newGame}
 					resetGameCancel={() => setShowResetGame(false)}
+					showChangeDifficulty={showChangeDifficulty}
+					changeDifficultyConfirm={newGame}
+					changeDifficultyCancel={() => setShowChangeDifficulty(false)}
 				/>
 				<WhiteCapturedPieces 
 					pieces={whiteCaptured}
