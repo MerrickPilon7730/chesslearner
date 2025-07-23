@@ -37,6 +37,8 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 	};
 	// Show modal for switching sids
 	const [showSwitchSides, setShowSwitchSides] =  useState(false);
+	// Show modal for resetting game
+	const [showResetGame, setShowResetGame] = useState(false);
 
 	function calcPoints(pieces: string[]) {
 		return pieces.reduce((acc, p) => acc + (pieceValues[p.toLowerCase()] ?? 0), 0);
@@ -68,11 +70,21 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 		setShowSwitchSides(false);
 	}
 
+	function reset() {
+		if (moveHistory.flat().length > 1){
+			setShowResetGame(true);
+		}
+		else{
+			newGame()
+		}
+	}
+
 	// Resets the current game
-	function resetGame() {
+	function newGame() {
 		setGame(new Chess());
 		setIsGameOver(false);
 		setMoveHistory([]);
+		setShowResetGame(false);
 	}
 
 	return (
@@ -81,7 +93,7 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 				<Button variant="default" onClick={playAs}>
 					Play As {string}
 				</Button>
-				<Button variant="default" onClick={resetGame}>
+				<Button variant="default" onClick={reset}>
 					Reset
 				</Button>
 				<p className="flex items-center">
@@ -107,6 +119,9 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 					showSwitchSides={showSwitchSides}
 					switchSidesConfirm={switchSides}
 					switchSidesCancel = {() => setShowSwitchSides(false)}
+					showResetGame={showResetGame}
+					resetGameConfirm={newGame}
+					resetGameCancel={() => setShowResetGame(false)}
 				/>
 				<WhiteCapturedPieces 
 					pieces={whiteCaptured}
