@@ -27,11 +27,13 @@ type props = {
     setIsGameOver: (over: boolean) => void;
     // Difficulty/depth for Stockfish
     difficulty: number;
+    // Function to set difficulty level
+    setDifficulty: (difficulty: number) => void;
     // Tracks all moves made
     setMoveHistory: React.Dispatch<React.SetStateAction<string[][]>>;
 }
 
-export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, difficulty, setMoveHistory}: props) {
+export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, difficulty, setDifficulty, setMoveHistory}: props) {
     // Highlights legal moves 
     const [legalMoveHighlights, setLegalMoveHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
     // Highlights check/mates
@@ -427,7 +429,12 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
             />
 
             {isGameOver && winner && (
-                <ChessResults winner={winner} reset={playAgain} />
+                <ChessResults 
+                    winner={winner} 
+                    reset={playAgain}
+                    difficulty={difficulty}
+                    setDifficulty={setDifficulty} 
+                />
             )}
         </div>
 
