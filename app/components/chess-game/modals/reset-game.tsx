@@ -12,7 +12,7 @@ type Props = {
     onCancel: () => void;
 }
 
-// Overlay/Modal that displays the winner and a reset/play again button
+// Overlay/Modal that confirms resetting the game
 export function ResetGame({onConfirm, onCancel}: Props) {
     return (
         <div className="absolute inset-0 flex items-center justify-center z-50">
