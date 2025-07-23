@@ -6,6 +6,7 @@ import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
 import { ChessResults } from "./chess-results";
 import { ChessStart } from "./chess-start";
+import { PlayAs } from "./play-as";
 
 // Move type (Moving pieces from, to and optional promotion for pawns)
 type Move = {
@@ -32,9 +33,15 @@ type props = {
     setDifficulty: (difficulty: number) => void;
     // Tracks all moves made
     setMoveHistory: React.Dispatch<React.SetStateAction<string[][]>>;
+    // Boolean for showing the playAs modal
+    showSwitchSides: boolean;
+    // Function to handle confirmation of switching color/sides
+    switchSidesConfirm: () => void;
+    // Function to handle declining of switching color/sides
+    switchSidesCancel: () => void;
 }
 
-export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, difficulty, setDifficulty, setMoveHistory}: props) {
+export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, difficulty, setDifficulty, setMoveHistory, showSwitchSides, switchSidesConfirm, switchSidesCancel}: props) {
     // Highlights legal moves 
     const [legalMoveHighlights, setLegalMoveHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
     // Highlights check/mates
@@ -447,6 +454,13 @@ export function ChessGame({side, game, setGame, isGameOver, setIsGameOver, diffi
                 setDifficulty={setDifficulty}
                 />
             )}
+
+            {showSwitchSides && (
+				<PlayAs
+					onConfirm={switchSidesConfirm}
+					onCancel={switchSidesCancel}
+				/>
+			)}
         </div>
 
     );
