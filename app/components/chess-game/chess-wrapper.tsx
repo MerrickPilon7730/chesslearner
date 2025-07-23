@@ -35,6 +35,8 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 	const pieceValues: Record<string, number> = {
 		p: 1, n: 3, b: 3, r: 5, q: 9,
 	};
+	// Show modal for switching sids
+	const [showSwitchSides, setShowSwitchSides] =  useState(false);
 
 	function calcPoints(pieces: string[]) {
 		return pieces.reduce((acc, p) => acc + (pieceValues[p.toLowerCase()] ?? 0), 0);
@@ -46,14 +48,25 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 	const showWhiteScore = whiteScore > blackScore;
 	const showBlackScore = blackScore > whiteScore;
 
-	// Called when player wants to switch sides. It switches sides and resets the game.
-	function onClick() {
+	// Called when player wants to switch sides.
+	function playAs() {
+		if (moveHistory.flat().length > 1 ){
+			setShowSwitchSides(true);
+		}
+		else{
+			switchSides();
+		}
+	} 
+
+	// Handles logic for switching sides
+	function switchSides() {
 		setSide(side === "white" ? "black" : "white");
 		setString(string === "Black" ? "White" : "Black");
 		setGame(new Chess());
 		setIsGameOver(false);
 		setMoveHistory([]);
-	} 
+		setShowSwitchSides(false);
+	}
 
 	// Resets the current game
 	function resetGame() {
@@ -65,7 +78,7 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 	return (
 		<div className="w-full flex flex-col justify-center items-center px-4">
 			<div className="w-full flex justify-center px-4 gap-4">
-				<Button variant="default" onClick={onClick}>
+				<Button variant="default" onClick={playAs}>
 					Play As {string}
 				</Button>
 				<Button variant="default" onClick={resetGame}>
@@ -91,6 +104,9 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 					difficulty={difficulty}
 					setMoveHistory={setMoveHistory}
 					setDifficulty={setDifficulty}
+					showSwitchSides={showSwitchSides}
+					switchSidesConfirm={switchSides}
+					switchSidesCancel = {() => setShowSwitchSides(false)}
 				/>
 				<WhiteCapturedPieces 
 					pieces={whiteCaptured}
