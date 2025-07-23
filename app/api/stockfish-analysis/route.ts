@@ -8,8 +8,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {fen, difficulty} = body;
 
-    // Sanitize and clamp the difficulty/depth value from 1-20, default of 5.
-    const depth = Math.max(1, Math.min(20, parseInt(difficulty, 10) || 5));
+    // Sanitize and clamp the skill level from 1-20, default of 5.
+    const skillLevel = Math.max(1, Math.min(20, parseInt(difficulty, 10) || 5));
 
     // Ensure that a FEN string was provided
     if (!fen) {
@@ -26,8 +26,9 @@ export async function POST(request: Request) {
 
         // Send UCI commands to Stockfish to start and provide positions
         stockfish.stdin.write("uci\n");
+        stockfish.stdin.write(`setoption name Skill Level value ${skillLevel}\n`);
         stockfish.stdin.write(`position fen ${fen}\n`);
-        stockfish.stdin.write(`go depth ${depth}\n`);
+        stockfish.stdin.write("go depth 20\n");
 
         let output = "";
 
