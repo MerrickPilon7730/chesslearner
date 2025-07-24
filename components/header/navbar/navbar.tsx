@@ -17,7 +17,7 @@ export function Navbar() {
     const pathName = usePathname();
 
     return(
-        <div className="flex items-center gap-x-2">
+        <div className="flex items-center gap-x-5">
             {navLinks.map((link) =>(
                 <NavButton 
                     key={link.href}
