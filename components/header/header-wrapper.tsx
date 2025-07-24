@@ -1,7 +1,6 @@
 "use client";
 
 import { HeaderLogo } from "./header-logo";
-import { ThemeToggle } from "../theme-toggle";
 import { Navbar } from "./navbar/navbar";
 
 // Wrapper for header componenets
@@ -12,9 +11,6 @@ export function HeaderWrapper() {
         <div className="flex items-center gap-x-10">
           <HeaderLogo />
           <Navbar />
-        </div>
-        <div className="text-white">
-          <ThemeToggle />
         </div>
       </div>
     </div>
