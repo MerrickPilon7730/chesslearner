@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         stockfish.stdin.write("uci\n");
         stockfish.stdin.write(`setoption name Skill Level value ${skillLevel}\n`);
         stockfish.stdin.write(`position fen ${fen}\n`);
-        stockfish.stdin.write("go depth 20\n");
+        stockfish.stdin.write("go depth 14\n");
 
         let output = "";
 
