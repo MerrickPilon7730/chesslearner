@@ -56,6 +56,11 @@ type props = {
     changeDifficultyCancel: () => void;
 }
 
+export type WinnerInfo = {
+    result: "White" | "Black" | "Draw" | null;
+    message: string;
+}
+
 export function ChessGame({
     side, 
     game, 
@@ -82,7 +87,7 @@ export function ChessGame({
     // Controls whether an AI move is in progress
     const [isProcessingAI, setIsProcessingAI] = useState(false);
     // Holds the winner for displaying game results
-    const [winner, setWinner] = useState<"White" | "Black" | "Draw" | null>(null);
+    const [winner, setWinner] = useState<WinnerInfo | null>(null);
     // Used for the starting prompt for difficulty
     const [gameStart, setGameStart] = useState(true);
 
@@ -268,11 +273,20 @@ export function ChessGame({
                         const loser = aiGameInstance.turn(); 
                         const winnerColor = loser === 'w' ? 'Black' : 'White';
 
-                        setWinner(winnerColor);
+                        setWinner({ result: winnerColor, message: "Checkmate"});
                         //Check for draw
                     } else if (aiGameInstance.isDraw()){
                         setIsGameOver(true);
-                        setWinner("Draw");
+                        
+                        if (aiGameInstance.isStalemate()){
+                            setWinner({result: "Draw", message: "Stalemate"})
+                        } else if (aiGameInstance.isThreefoldRepetition()){
+                            setWinner({result: "Draw", message: "Threefold Repition"})
+                        } else if (aiGameInstance.isInsufficientMaterial()){
+                            setWinner({result: "Draw", message: " Insufficient Material"})
+                        } else {
+                            setWinner({result: "Draw", message: "Draw"})
+                        }
                     }
 
                     // Highlight losing king
@@ -344,11 +358,20 @@ export function ChessGame({
             const loser = updatedGame.turn(); 
             const winnerColor = loser === 'w' ? 'Black' : 'White';
 
-            setWinner(winnerColor);
+            setWinner({ result: winnerColor, message: "Checkmate"});
         // Check for draw
         } else if (updatedGame.isDraw()){
             setIsGameOver(true);
-            setWinner("Draw");
+            
+            if (updatedGame.isStalemate()){
+                setWinner({result: "Draw", message: "Stalemate"})
+            } else if (updatedGame.isThreefoldRepetition()){
+                setWinner({result: "Draw", message: "Threefold Repition"})
+            } else if (updatedGame.isInsufficientMaterial()){
+                setWinner({result: "Draw", message: " Insufficient Material"})
+            } else {
+                setWinner({result: "Draw", message: "Draw"})
+            }
         }
 
         // Call Checkmate function to handle that logic
@@ -403,7 +426,7 @@ export function ChessGame({
             setIsGameOver(true);
             const loserColor = updatedGame.turn();
             const winnerColor = loserColor === "w" ? "Black" : "White";
-            setWinner(winnerColor);
+            setWinner({result: winnerColor, message: "Checkmate"});
         } else if (updatedGame.isDraw()) {
             setIsGameOver(true);
         }
