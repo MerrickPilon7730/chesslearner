@@ -150,8 +150,6 @@ export function ChessGame({
             const gameCopy = new Chess(game.fen());
             // Attempt to make the move on the copied board
             const result = gameCopy.move(move);
-            // Log the move in UCI format (to and from e.g. e2d4 )
-            console.log("Player move:", result.from + result.to);
 
             // If the move is valid return the updated game state
             if (result) return gameCopy;
@@ -218,7 +216,6 @@ export function ChessGame({
 
         // Lock AI processing to prevent duplicate calls
         setIsProcessingAI(true);
-        console.log("Sending difficulty to API:", difficulty);
 
         try {
             // Send current position and difficulty/depth to Stockfish API
@@ -230,7 +227,6 @@ export function ChessGame({
 
             const data = await response.json();
             const bestMove: string = data.move;
-            console.log("AI best move:", bestMove);
 
             // Ensure best move in valid format (e2e4 etc)
             if (bestMove?.length >= 4) {
@@ -291,7 +287,6 @@ export function ChessGame({
             console.error("AI move failed:", err);
         } finally {
             // Clear AI processing flag
-            console.log("AI processing finished.");
             setIsProcessingAI(false);
         }
     }, [side, kingThreats, setGame, setIsGameOver, difficulty, isProcessingAI, setMoveHistory]);
