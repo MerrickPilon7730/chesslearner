@@ -95,8 +95,8 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 	}
 
 	return (
-		<div className="w-full flex flex-col justify-center items-center px-4">
-			<div className="w-full flex justify-center px-4 gap-4">
+		<div className="w-full flex flex-col justify-center items-center px-4 mr-5">
+			<div className="w-full flex flex-col lg:flex-row justify-center px-4 gap-4">
 				<Button variant="default" onClick={playAs}>
 					Play As {string}
 				</Button>
@@ -106,7 +106,7 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 				<Button variant="default" onClick={ChangeDifficulty}>
 					Difficulty
 				</Button>
-				<p className="flex items-center">
+				<p className="flex items-center justify-center">
 					<b className="mr-1">Difficulty:</b> {difficulty}
 				</p>
 			</div>
