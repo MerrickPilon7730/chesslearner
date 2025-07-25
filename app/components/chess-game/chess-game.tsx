@@ -5,11 +5,7 @@ import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
 
-import { ChessResults } from "./modals/chess-results";
-import { ChessStart } from "./modals/chess-start";
-import { PlayAs } from "./modals/play-as";
-import { ResetGame } from "./modals/reset-game";
-import { ChangeDifficulty } from "./modals/change-difficulty";
+import { ChessNotification } from "./modals/notifications";
 
 // Move type (Moving pieces from, to and optional promotion for pawns)
 type Move = {
@@ -20,40 +16,8 @@ type Move = {
 
 // Properties expected by the ChessGame component
 type props = {
-    // Player side
-    side: "black" | "white";
-    // Chess game instance
-    game: Chess;
-    // Setter for game state
-    setGame: (game: Chess) => void;
-    // Whether the game is over
-    isGameOver: boolean;
-    // Setter for game over state
-    setIsGameOver: (over: boolean) => void;
-    // Difficulty/depth for Stockfish
-    difficulty: number;
-    // Function to set difficulty level
-    setDifficulty: (difficulty: number) => void;
     // Tracks all moves made
     setMoveHistory: React.Dispatch<React.SetStateAction<string[][]>>;
-    // Boolean for showing the playAs modal
-    showSwitchSides: boolean;
-    // Function to handle confirmation of switching color/sides
-    switchSidesConfirm: () => void;
-    // Function to handle declining of switching color/sides
-    switchSidesCancel: () => void;
-    // Boolean for showing the reset game modal
-    showResetGame: boolean;
-    // Function to handle confirmation of reseting the game
-    resetGameConfirm: () => void;
-    // Function to handle devlining of resetting the game
-    resetGameCancel: () => void;
-    // Boolean for showing change difficulty modal 
-    showChangeDifficulty: boolean;
-    // Function to handle confirmation of difficulty change
-    changeDifficultyConfirm: () => void;
-    // Function to handle declining difficulty change
-    changeDifficultyCancel: () => void;
 }
 
 export type WinnerInfo = {
@@ -62,23 +26,7 @@ export type WinnerInfo = {
 }
 
 export function ChessGame({
-    side, 
-    game, 
-    setGame, 
-    isGameOver, 
-    setIsGameOver, 
-    difficulty, 
-    setDifficulty, 
     setMoveHistory, 
-    showSwitchSides, 
-    switchSidesConfirm, 
-    switchSidesCancel,
-    showResetGame,
-    resetGameConfirm,
-    resetGameCancel,
-    showChangeDifficulty,
-    changeDifficultyConfirm, 
-    changeDifficultyCancel
 }: props) {
     // Highlights legal moves 
     const [legalMoveHighlights, setLegalMoveHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
@@ -87,9 +35,17 @@ export function ChessGame({
     // Controls whether an AI move is in progress
     const [isProcessingAI, setIsProcessingAI] = useState(false);
     // Holds the winner for displaying game results
-    const [winner, setWinner] = useState<WinnerInfo | null>(null);
-    // Used for the starting prompt for difficulty
-    const [gameStart, setGameStart] = useState(true);
+    const [winner, setWinner] = useState<WinnerInfo | undefined>(undefined);
+    // Used to show the notification component
+    const [showNotification, setShowNotification] = useState(true);
+    // Handles game state (game over true/false)
+    const [isGameOver, setIsGameOver] = useState(true);
+    // Holds the state for player side
+    const [side, setSide] = useState<"black" | "white">("white");
+    // Holds the difficulty level, default of 5
+    const [difficulty, setDifficulty] = useState(5)
+    // Handles resetting the game state
+    const [game, setGame] = useState(new Chess());
 
     function isPlayerPiece(square: Square): boolean {
         const piece = game.get(square);
@@ -216,6 +172,8 @@ export function ChessGame({
 
     // Sends FEN(Forsyth-Edwards Notation) and difficulty/depth to the API to get the best move from Stockfish
     const handleAIMove = useCallback(async (fen: string) => {
+        // If game is over AI stop making moves
+        if (isGameOver) return;
         // Prevents AI from moving if it's not its turn or if it is processing a move
         if (isProcessingAI || new Chess(fen).turn() === side[0]) return;
 
@@ -274,6 +232,7 @@ export function ChessGame({
                         const winnerColor = loser === 'w' ? 'Black' : 'White';
 
                         setWinner({ result: winnerColor, message: "Checkmate"});
+                        setShowNotification(true);
                         //Check for draw
                     } else if (aiGameInstance.isDraw()){
                         setIsGameOver(true);
@@ -287,6 +246,7 @@ export function ChessGame({
                         } else {
                             setWinner({result: "Draw", message: "Draw"})
                         }
+                        setShowNotification(true);
                     }
 
                     // Highlight losing king
@@ -303,7 +263,7 @@ export function ChessGame({
             // Clear AI processing flag
             setIsProcessingAI(false);
         }
-    }, [side, kingThreats, setGame, setIsGameOver, difficulty, isProcessingAI, setMoveHistory]);
+    }, [side, kingThreats, setGame, setIsGameOver, difficulty, isProcessingAI, setMoveHistory, isGameOver]);
 
     // Handles the logic when a piece is dropped on target square 
     function onDrop(sourceSquare: string, targetSquare: string): boolean {
@@ -359,6 +319,7 @@ export function ChessGame({
             const winnerColor = loser === 'w' ? 'Black' : 'White';
 
             setWinner({ result: winnerColor, message: "Checkmate"});
+            setShowNotification(true);
         // Check for draw
         } else if (updatedGame.isDraw()){
             setIsGameOver(true);
@@ -372,6 +333,7 @@ export function ChessGame({
             } else {
                 setWinner({result: "Draw", message: "Draw"})
             }
+            setShowNotification(true);
         }
 
         // Call Checkmate function to handle that logic
@@ -427,8 +389,10 @@ export function ChessGame({
             const loserColor = updatedGame.turn();
             const winnerColor = loserColor === "w" ? "Black" : "White";
             setWinner({result: winnerColor, message: "Checkmate"});
+            setShowNotification(true);
         } else if (updatedGame.isDraw()) {
             setIsGameOver(true);
+            setShowNotification(true);
         }
 
         // Promotion successful
@@ -443,15 +407,14 @@ export function ChessGame({
 
         return pieceColor === side[0] && currentTurn === side[0];
     }
-
-    // Resets game state to allow a new game and initializes a new game instance
-    function playAgain() {
+    
+    // Function to reset the game state
+    function reset() {
+        setShowNotification(false);
         setIsGameOver(false);
-        setWinner(null);
-        setGame(new Chess());
         setMoveHistory([]);
+        setGame(new Chess());
         setCheckHighlights({});
-        setLegalMoveHighlights({});
     }
 
     // useEffect to trigger the AI move
@@ -489,45 +452,17 @@ export function ChessGame({
                 isDraggablePiece={canDragPiece}
             />
 
-            {isGameOver && winner && (
-                <ChessResults 
-                    winner={winner} 
-                    reset={playAgain}
-                    difficulty={difficulty}
-                    setDifficulty={setDifficulty} 
-                />
-            )}
-
-            {gameStart && (
-                <ChessStart 
-                setGameStart={setGameStart} 
-                difficulty={difficulty}
-                setDifficulty={setDifficulty}
-                />
-            )}
-
-            {showSwitchSides && (
-				<PlayAs
-					onConfirm={switchSidesConfirm}
-					onCancel={switchSidesCancel}
-				/>
-			)}
-
-            {showResetGame && (
-                <ResetGame 
-                    onConfirm={resetGameConfirm}
-                    onCancel={resetGameCancel}
-                />
-            )}
-
-            {showChangeDifficulty && (
-                <ChangeDifficulty 
-                    onConfirm={changeDifficultyConfirm}
-                    onCancel={changeDifficultyCancel}
+            {showNotification && (
+                <ChessNotification 
+                    winner={winner}
                     difficulty={difficulty}
                     setDifficulty={setDifficulty}
+                    side={side}
+                    setSide={setSide}
+                    reset={reset}
                 />
             )}
+
         </div>
 
     );
