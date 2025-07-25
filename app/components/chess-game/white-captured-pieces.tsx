@@ -3,11 +3,11 @@ import React from "react";
 import Image from "next/image";
 
 const pieceImages: Record<string, string> = {
-  p: "https://chessboardjs.com/img/chesspieces/wikipedia/bP.png",
-  n: "https://chessboardjs.com/img/chesspieces/wikipedia/bN.png",
-  b: "https://chessboardjs.com/img/chesspieces/wikipedia/bB.png",
-  r: "https://chessboardjs.com/img/chesspieces/wikipedia/bR.png",
-  q: "https://chessboardjs.com/img/chesspieces/wikipedia/bQ.png",
+  p: "/chess-pieces/black/bP.png",
+  n: "/chess-pieces/black/bN.png",
+  b: "/chess-pieces/black/bB.png",
+  r: "/chess-pieces/black/bR.png",
+  q: "/chess-pieces/black/bQ.png",
 };
 
 type Props = {
