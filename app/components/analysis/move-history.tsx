@@ -1,11 +1,12 @@
 
+import { MoveHistory } from "@/types/game";
 import { useEffect, useRef } from "react";
 
 type Props = {
-    moveHistory: string[][];
+    moveHistory: MoveHistory;
 };
 
-export function MoveHistory({moveHistory}: Props){
+export function MoveHistoryComp({moveHistory}: Props){
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
