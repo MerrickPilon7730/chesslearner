@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
@@ -39,7 +39,7 @@ export function ChessGame({
     // Used to show the notification component
     const [showNotification, setShowNotification] = useState(true);
     // Handles game state (game over true/false)
-    const [isGameOver, setIsGameOver] = useState(true);
+    const [isGameOver, setIsGameOver] = useState(false);
     // Holds the state for player side
     const [side, setSide] = useState<"black" | "white">("white");
     // Holds the difficulty level, default of 5
@@ -83,6 +83,7 @@ export function ChessGame({
 
     // Same as onSquareClick but starts when a piece is being dragged
     function onPieceDragBegin(piece: string, sourceSquare: string) {
+        console.log('onPieceDragBegin', piece, sourceSquare);
         if (isGameOver || !isPlayerPiece(sourceSquare as Square)) return;
 
         const moves = game.moves({square: sourceSquare as Square, verbose: true,}) as Array<{ to: string }>;
@@ -395,9 +396,13 @@ export function ChessGame({
             setShowNotification(true);
         }
 
+        if (updatedGame.turn() !== side[0]) {
+            handleAIMove(updatedGame.fen());
+        }
         // Promotion successful
         return true;
     }
+    const sideColor = useMemo(() => side[0], [side]);
 
     function canDragPiece({ piece }: { piece: string }): boolean {
         if (isGameOver) return false;
@@ -405,7 +410,10 @@ export function ChessGame({
         const currentTurn = game.turn(); 
         const pieceColor = piece[0];     
 
-        return pieceColor === side[0] && currentTurn === side[0];
+         console.log(`canDragPiece: pieceColor=${pieceColor}, side=${sideColor}, currentTurn=${currentTurn}`);
+         console.log( "isGameOver: " + isGameOver)
+
+        return pieceColor === sideColor && currentTurn === sideColor;
     }
     
     // Function to reset the game state
@@ -417,13 +425,21 @@ export function ChessGame({
         setCheckHighlights({});
     }
 
+    const skipFirstEffect = useRef(true);
+
     // useEffect to trigger the AI move
     useEffect(() => {
-        // If it's the AI's trun, call handleAIMove
+        if (skipFirstEffect.current) {
+            skipFirstEffect.current = false;
+            return;
+        }
+
+        if (showNotification) return;
+
         if (game.turn() !== side[0]) {
             handleAIMove(game.fen());
         }
-    }, [side, game, handleAIMove]);
+    }, [side, game, handleAIMove, showNotification]);
 
     // useEffect to clear highlights if the game is not in check/mate
     useEffect(() => {
