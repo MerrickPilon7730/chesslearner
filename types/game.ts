@@ -1,0 +1,32 @@
+
+export type Setter<T> = React.Dispatch<React.SetStateAction<T>>;
+
+export type Difficulty = number;
+export type SetDifficulty = Setter<Difficulty>;
+
+export type Side = "black" | "white";
+export type SetSide = Setter<Side>;
+
+export type MoveHistory = string[][];
+export type SetMoveHistory = Setter<MoveHistory>;
+
+export type WinnerInfo = {
+    result: "White" | "Black" | "Draw" | null;
+    message: string;
+};
+
+export type Move = {
+    from: string;
+    to: string;
+    promotion?: string;
+}
+
+export type Pieces = string[];
+export type PieceValues = Record<"p" | "n" | "b" | "r" | "q", number>;
+export const pieceValues: PieceValues = {
+  p: 1,
+  n: 3,
+  b: 3,
+  r: 5,
+  q: 9,
+};
