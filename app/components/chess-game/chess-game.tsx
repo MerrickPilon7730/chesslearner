@@ -5,25 +5,21 @@ import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
 
+import { 
+    WinnerInfo,
+    Move,
+    SetMoveHistory,
+} from "@/types/game";
+
 import { ChessNotification } from "./modals/notifications";
 
-// Move type (Moving pieces from, to and optional promotion for pawns)
-type Move = {
-  from: string;
-  to: string;
-  promotion?: string;
-};
 
 // Properties expected by the ChessGame component
 type props = {
     // Tracks all moves made
-    setMoveHistory: React.Dispatch<React.SetStateAction<string[][]>>;
+    setMoveHistory: SetMoveHistory
 }
 
-export type WinnerInfo = {
-    result: "White" | "Black" | "Draw" | null;
-    message: string;
-}
 
 export function ChessGame({
     setMoveHistory, 

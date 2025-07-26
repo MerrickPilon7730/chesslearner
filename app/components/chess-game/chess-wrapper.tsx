@@ -7,9 +7,14 @@ import { WhiteCapturedPieces } from "./white-captured-pieces";
 import { BlackCapturedPieces } from "./black-captured-pieces";
 import { useCapturedPieces } from "@/hooks/useCapturedPieces";
 
+import { 
+	MoveHistory, 
+	SetMoveHistory 
+} from "@/types/game";
+
 type Props = {
-  setMoveHistory: React.Dispatch<React.SetStateAction<string[][]>>;
-  moveHistory: string[][];
+  setMoveHistory: SetMoveHistory;
+  moveHistory: MoveHistory;
 };
 
 // This component acts as a wrapper for game state and UI controls

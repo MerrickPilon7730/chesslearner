@@ -1,13 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import { WinnerInfo } from "../chess-game";
+
+import { 
+	Difficulty, 
+	SetDifficulty, 
+	SetSide, 
+	Side, 
+	WinnerInfo 
+} from "@/types/game";
 
 type Props = {
   winner?: WinnerInfo;
-  difficulty: number;
-  side: "black" | "white";
-  setSide: React.Dispatch<React.SetStateAction<"white" | "black">>;
-  setDifficulty: (difficulty: number) => void;
+  difficulty: Difficulty
+  side: Side;
+  setSide: SetSide;
+  setDifficulty: SetDifficulty;
   reset: () => void;
 };
 
