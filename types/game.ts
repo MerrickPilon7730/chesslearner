@@ -1,3 +1,7 @@
+import { 
+  Dispatch, 
+  SetStateAction 
+} from "react";
 
 export type Setter<T> = React.Dispatch<React.SetStateAction<T>>;
 
@@ -30,3 +34,5 @@ export const pieceValues: PieceValues = {
   r: 5,
   q: 9,
 };
+
+export type DispatchStateAction<T> = Dispatch<SetStateAction<T>>;
