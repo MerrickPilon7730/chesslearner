@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 
-import { ChessGame } from "./chess-game";
+import { ChessPlayGame } from "./chess-play-game";
 import { WhiteCapturedPieces } from "./white-captured-pieces";
 import { BlackCapturedPieces } from "./black-captured-pieces";
 import { useCapturedPieces } from "@/hooks/useCapturedPieces";
@@ -18,7 +18,7 @@ type Props = {
 };
 
 // This component acts as a wrapper for game state and UI controls
-export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
+export function ChessPlayWrapper({setMoveHistory, moveHistory}: Props) {
 	// Converts move history from string[][] to string[]
 	const flatMoveHistory = useMemo(() => moveHistory.flat(), [moveHistory]);
 	// Uses flatMoveHistory to keep track of pieces captured
@@ -46,7 +46,7 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 					showScore={showBlackScore}
 					score={blackScore - whiteScore}
 				/>
-				<ChessGame
+				<ChessPlayGame
 					setMoveHistory={setMoveHistory}
 				/>
 				<WhiteCapturedPieces 

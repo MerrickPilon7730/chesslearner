@@ -21,7 +21,7 @@ type props = {
 }
 
 
-export function ChessGame({
+export function ChessPlayGame({
     setMoveHistory, 
 }: props) {
     // Highlights legal moves 

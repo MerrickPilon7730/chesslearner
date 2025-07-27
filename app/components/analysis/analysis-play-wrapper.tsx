@@ -13,7 +13,7 @@ type Props = {
     moveHistory: MoveHistory;
 };
 
-export function AnalysisWrapper({ moveHistory }: Props) {
+export function AnalysisPlayWrapper({ moveHistory }: Props) {
     return (
         <Card className="w-full h-full max-w-[90%] max-h-90%]">
             <CardHeader className="flex items-center justify-center">
