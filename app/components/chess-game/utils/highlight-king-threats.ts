@@ -4,18 +4,18 @@ import { Chess } from "chess.js";
 import { DispatchStateAction } from "@/types/game";
 
 type Props = {
-    gameInstance: Chess;
+    game: Chess;
     setCheckHighlights: DispatchStateAction<{ [square: string]: React.CSSProperties }>;
 }
 
 export function highlightKingThreats({
-    gameInstance,
+    game,
     setCheckHighlights,
 }: Props) {
-    const board = gameInstance.board();
-    const isCheck = gameInstance.inCheck();
-    const isMate = gameInstance.isCheckmate();
-    const kingColor = gameInstance.turn();
+    const board = game.board();
+    const isCheck = game.inCheck();
+    const isMate = game.isCheckmate();
+    const kingColor = game.turn();
 
     let kingSquare: string | null = null;
 
