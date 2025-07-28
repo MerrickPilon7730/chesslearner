@@ -1,7 +1,9 @@
 
-import { Chess, Move } from "chess.js";
+import { Chess } from "chess.js";
 
-export function playerMove(game: Chess, move: Move | string): Chess | null {
+import { Move } from "@/types/game";
+
+export function playerMove(game: Chess, move: Move): Chess | null {
   try {
     const gameCopy = new Chess(game.fen());
     const result = gameCopy.move(move);
