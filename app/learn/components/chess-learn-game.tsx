@@ -1,10 +1,11 @@
 
 import { useState } from "react";
 
-import { Chess, type Square } from "chess.js";
+import { Chess } from "chess.js";
+import type { Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
 
-import { SetMoveHistory } from "@/types/game";
+import { SetMoveHistory, WinnerInfo } from "@/types/game";
 
 import { highlightLegalMoves } from "@/app/components/chess-game/utils/highlight-legal-moves";
 import { highlightKingThreats } from "@/app/components/chess-game/utils/highlight-king-threats";
@@ -12,6 +13,7 @@ import { pawnPromotion } from "@/app/components/chess-game/utils/pawn-promotion"
 import { handlePawnPromotion } from "@/app/components/chess-game/utils/confirm-promotion";
 import { handleMove } from "@/app/components/chess-game/utils/handle-move";
 import { canPlayerDragPiece } from "@/app/components/chess-game/utils/drag-pieces";
+import { checkGameEnd } from "@/app/components/chess-game/utils/check-game-end";
 
 type Props = {
     setMoveHistory: SetMoveHistory;
@@ -25,14 +27,82 @@ export function ChessLearnGame({
     const [legalMoveHighlights, setLegalMoveHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
     const [checkhighlights, setCheckHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
     const [isGameOver, setIsGameOver] = useState(false);
+    const [winner, setWinner] = useState<WinnerInfo | undefined>(undefined);
+    const [showNotification, setShowNotification] = useState(true);
+    const [difficulty, setDifficulty] = useState(5);
+    const [pendingPromotion, setPendingPromotion] = useState<{
+        from: Square;
+        to: Square;
+        piece: string;
+    } | null>(null);
 
     function isPlayerPiece(square: Square): boolean {
         const piece = game.get(square);
         return piece?.color === side[0];
     }
 
+    function onPromotionCheck(
+        sourceSquare: Square,
+        targetSquare: Square,
+        piece: string,
+    ): boolean {
+
+        const isPromotion = pawnPromotion({
+            sourceSquare,
+            targetSquare,
+            piece,
+        });
+
+        if (isPromotion) {
+            setPendingPromotion({ from: sourceSquare, to: targetSquare, piece });
+        }
+
+        return isPromotion;
+    }
+
+    function onPromotionPieceSelect(
+        piece?: string, 
+        promoteFromSquare?: Square,
+        promoteToSquare?: Square
+    ): boolean {
+        if (!piece || !promoteFromSquare || !promoteToSquare || !game) return false;
+
+         const pieceString = piece[1].toLowerCase();
+
+        const move = {
+            from: promoteFromSquare,
+            to: promoteToSquare,
+            promotion: pieceString,
+        };
+
+        const result = game.move(move);
+        if (!result) return false;
+
+        setGame(new Chess(game.fen()));
+
+        setMoveHistory((prev) => {
+            const newHistory = [...prev];
+            if (result.color === "w") {
+            newHistory.push([result.san]);
+            } else {
+            const last = newHistory.pop() || [""];
+            last[1] = result.san;
+            newHistory.push(last);
+            }
+            return newHistory;
+        });
+
+        setPendingPromotion(null);
+        setLegalMoveHighlights({});
+        highlightKingThreats({ game, setCheckHighlights });
+        checkGameEnd({ game, setIsGameOver, setWinner, setShowNotification });
+
+        return true;
+    }
+
+
+
     function onSquareClick(square: string){
-        console.log("Clicked:", square);
         highlightLegalMoves({
             square,
             game,
@@ -53,7 +123,6 @@ export function ChessLearnGame({
 
         if (!canDrag) return;
 
-        console.log("Dragged:", sourceSquare);
         highlightLegalMoves({
             square: sourceSquare,
             game,
@@ -107,6 +176,18 @@ export function ChessLearnGame({
             });
         }
 
+        highlightKingThreats({
+            game: updatedGame,
+            setCheckHighlights,
+        })
+
+        checkGameEnd({
+            game: updatedGame,
+            setIsGameOver,
+            setWinner,
+            setShowNotification,
+        });
+
         return true;
     }
 
@@ -119,6 +200,9 @@ export function ChessLearnGame({
                 onPieceDragBegin={onPieceDragBegin}
                 customSquareStyles={{ ...legalMoveHighlights, ...checkhighlights}}
                 onPieceDrop={onDrop}
+                onPromotionCheck={onPromotionCheck}
+                onPromotionPieceSelect={onPromotionPieceSelect}
+                arePiecesDraggable={!isGameOver}
             />
         </div>
     )
