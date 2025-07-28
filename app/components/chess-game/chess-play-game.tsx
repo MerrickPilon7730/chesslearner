@@ -15,15 +15,14 @@ import { ChessNotification } from "./modals/notifications";
 
 
 // Properties expected by the ChessGame component
-type props = {
+type Props = {
     // Tracks all moves made
     setMoveHistory: SetMoveHistory
 }
 
-
 export function ChessPlayGame({
     setMoveHistory, 
-}: props) {
+}: Props) {
     // Highlights legal moves 
     const [legalMoveHighlights, setLegalMoveHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
     // Highlights check/mates
@@ -48,7 +47,7 @@ export function ChessPlayGame({
         return piece?.color === side[0];
     }
 
-    // Shows legal moves for piece that is clicked
+    // *Shows legal moves for piece that is clicked
     function onSquareClick(square: string) {
         if (isGameOver || !isPlayerPiece(square as Square)) return;
 
@@ -77,7 +76,7 @@ export function ChessPlayGame({
         setLegalMoveHighlights(newHighlights);
     }
 
-    // Same as onSquareClick but starts when a piece is being dragged
+    // *Same as onSquareClick but starts when a piece is being dragged
     function onPieceDragBegin(piece: string, sourceSquare: string) {
         console.log('onPieceDragBegin', piece, sourceSquare);
         if (isGameOver || !isPlayerPiece(sourceSquare as Square)) return;
@@ -101,7 +100,7 @@ export function ChessPlayGame({
         setLegalMoveHighlights(newHighlights);
     }
 
-    // Handles the player making a move and returns the updated game state is valid
+    // *Handles the player making a move and returns the updated game state is valid
     function makeAMove(move: Move | string): Chess | null {
         try {
             // Create a copy of the current game state to avoid mutating the origional
@@ -121,7 +120,7 @@ export function ChessPlayGame({
         }
     }
 
-    // Highlights the king's square red when checkmated
+    // * Highlights the king's square red when checkmated
     const kingThreats = useCallback((gameInstance: Chess) => {
         // Get the current board layout as a 2D array
         const board = gameInstance.board();
@@ -345,7 +344,7 @@ export function ChessPlayGame({
         return true;
     }
 
-    // Checks if a pawn move qualifies for a promotion
+    // *Checks if a pawn move qualifies for a promotion
     function onPromotionCheck(sourceSquare: Square, targetSquare: Square, piece: string): boolean {
 
         // Check if white pawn is moving from the 7th to 8th rank and if a black pawn is moving from the 2nd rank to the 1st
@@ -358,7 +357,7 @@ export function ChessPlayGame({
         return false;
     }
 
-    // Handles the logic after a user selects a piece for pawn promotion
+    // *Handles the logic after a user selects a piece for pawn promotion
     function onPromotionPieceSelect(piece?: string, promoteFromSquare?: Square, promoteToSquare?: Square): boolean {
         // Ensure all required parameters are provided
         if (!piece || !promoteFromSquare || !promoteToSquare) return false;
