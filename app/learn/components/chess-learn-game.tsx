@@ -31,11 +31,6 @@ export function ChessLearnGame({
     const [winner, setWinner] = useState<WinnerInfo | undefined>(undefined);
     const [showNotification, setShowNotification] = useState(true);
     const [difficulty, setDifficulty] = useState(5);
-    const [pendingPromotion, setPendingPromotion] = useState<{
-        from: Square;
-        to: Square;
-        piece: string;
-    } | null>(null);
 
     function isPlayerPiece(square: Square): boolean {
         const piece = game.get(square);
@@ -53,10 +48,6 @@ export function ChessLearnGame({
             targetSquare,
             piece,
         });
-
-        if (isPromotion) {
-            setPendingPromotion({ from: sourceSquare, to: targetSquare, piece });
-        }
 
         return isPromotion;
     }
@@ -84,16 +75,15 @@ export function ChessLearnGame({
         setMoveHistory((prev) => {
             const newHistory = [...prev];
             if (result.color === "w") {
-            newHistory.push([result.san]);
+                newHistory.push([result.san]);
             } else {
-            const last = newHistory.pop() || [""];
-            last[1] = result.san;
-            newHistory.push(last);
+                const last = newHistory.pop() || [""];
+                last[1] = result.san;
+                newHistory.push(last);
             }
             return newHistory;
         });
 
-        setPendingPromotion(null);
         setLegalMoveHighlights({});
         highlightKingThreats({ game, setCheckHighlights });
         checkGameEnd({ game, setIsGameOver, setWinner, setShowNotification });
@@ -162,7 +152,7 @@ export function ChessLearnGame({
         setGame(updatedGame);
         setLegalMoveHighlights({});
 
-        const lastMove = game.history({ verbose: true }).at(-1);
+        const lastMove = updatedGame.history({ verbose: true }).at(-1);
         if (lastMove) {
             setMoveHistory((prev) => {
                 const newHistory = [...prev];
