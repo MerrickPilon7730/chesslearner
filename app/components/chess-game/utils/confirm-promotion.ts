@@ -1,6 +1,6 @@
 import type { Square } from "chess.js";
 import { Chess} from "chess.js";
-import { playerMove } from "./player-move";
+import { handleMove } from "./handle-move";
 
 type PromotionResult = {
     success: boolean;
@@ -19,7 +19,7 @@ export function handlePawnPromotion(
 
     const promotion = piece[piece.length - 1].toLowerCase() as "q" | "r" | "b" | "n";
 
-    const updatedGame = playerMove(currentGame, {
+    const updatedGame = handleMove(currentGame, {
         from: promoteFromSquare,
         to: promoteToSquare,
         promotion,
