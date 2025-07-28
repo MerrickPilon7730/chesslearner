@@ -14,6 +14,7 @@ import { handlePawnPromotion } from "@/app/components/chess-game/utils/confirm-p
 import { handleMove } from "@/app/components/chess-game/utils/handle-move";
 import { canPlayerDragPiece } from "@/app/components/chess-game/utils/drag-pieces";
 import { checkGameEnd } from "@/app/components/chess-game/utils/check-game-end";
+import { ChessNotification } from "@/app/components/chess-game/modals/notifications";
 
 type Props = {
     setMoveHistory: SetMoveHistory;
@@ -191,6 +192,14 @@ export function ChessLearnGame({
         return true;
     }
 
+    function reset() {
+        setShowNotification(false);
+        setIsGameOver(false);
+        setMoveHistory([]);
+        setGame(new Chess());
+        setCheckHighlights({});
+    }
+
     return(
         <div className="relative w-full max-w-[700px] border-2 dark:border-2 aspect-square">
             <Chessboard 
@@ -204,6 +213,17 @@ export function ChessLearnGame({
                 onPromotionPieceSelect={onPromotionPieceSelect}
                 arePiecesDraggable={!isGameOver}
             />
+
+            {showNotification && (
+                <ChessNotification 
+                    winner={winner}
+                    difficulty={difficulty}
+                    setDifficulty={setDifficulty}
+                    side={side}
+                    setSide={setSide}
+                    reset={reset}
+                />
+            )}
         </div>
     )
 
