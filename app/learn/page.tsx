@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 
-import { ChessLearnGame } from "./components/chess-learn-game";
+import { ChessLearnWrapper } from "./components/chess-learn-wrapper";
 
 export default function Learn() {
 	const [moveHistory, setMoveHistory] = useState<string[][]>([]);
@@ -12,7 +12,7 @@ export default function Learn() {
 		<div className="flex items-center justify-center">
 			<div className="grid grid-cols-1 md:grid-cols-2 w-[90%]">
 				<div className="flex items-center justify-center py-5">
-					<ChessLearnGame setMoveHistory={setMoveHistory}/>
+					<ChessLearnWrapper moveHistory={moveHistory} setMoveHistory={setMoveHistory}/>
 				</div>
 				<div className="flex items-center justify-center py-5">
 					Analysis
