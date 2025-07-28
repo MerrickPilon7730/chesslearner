@@ -10,6 +10,8 @@ import { highlightLegalMoves } from "@/app/components/chess-game/utils/highlight
 import { highlightKingThreats } from "@/app/components/chess-game/utils/highlight-king-threats";
 import { pawnPromotion } from "@/app/components/chess-game/utils/pawn-promotion";
 import { handlePawnPromotion } from "@/app/components/chess-game/utils/confirm-promotion";
+import { handleMove } from "@/app/components/chess-game/utils/handle-move";
+import { canPlayerDragPiece } from "@/app/components/chess-game/utils/drag-pieces";
 
 type Props = {
     setMoveHistory: SetMoveHistory;
@@ -41,6 +43,16 @@ export function ChessLearnGame({
     }
 
     function onPieceDragBegin(piece: string, sourceSquare: string) {
+        const sideColor = side[0] as "w" | "b";
+        const canDrag = canPlayerDragPiece({
+            piece,
+            game,
+            isGameOver,
+            sideColor,
+        });
+
+        if (!canDrag) return;
+
         console.log("Dragged:", sourceSquare);
         highlightLegalMoves({
             square: sourceSquare,
@@ -63,12 +75,40 @@ export function ChessLearnGame({
             piece: `${piece.color}${piece.type}`,
         })
 
-        if (isPromotion){
-            handlePawnPromotion(piece.type, from, to, game);
+        let updatedGame: Chess | null = null;
+
+        if (isPromotion) {
+            const promotionResult = handlePawnPromotion(piece.type, from, to, game);
+            if (!promotionResult.success || !promotionResult.updatedGame) return false;
+            updatedGame = promotionResult.updatedGame;
+        } else {
+            updatedGame = handleMove(game, {
+                from,
+                to,
+            });
+            if (!updatedGame) return false;
         }
 
-    }
+        setGame(updatedGame);
+        setLegalMoveHighlights({});
 
+        const lastMove = game.history({ verbose: true }).at(-1);
+        if (lastMove) {
+            setMoveHistory((prev) => {
+                const newHistory = [...prev];
+                if (lastMove.color === "w") {
+                    newHistory.push([lastMove.san]);
+                } else {
+                    const last = newHistory.pop() || [""];
+                    last[1] = lastMove.san;
+                    newHistory.push(last);
+                }
+                return newHistory;
+            });
+        }
+
+        return true;
+    }
 
     return(
         <div className="relative w-full max-w-[700px] border-2 dark:border-2 aspect-square">
@@ -78,7 +118,7 @@ export function ChessLearnGame({
                 onSquareClick={onSquareClick}
                 onPieceDragBegin={onPieceDragBegin}
                 customSquareStyles={{ ...legalMoveHighlights, ...checkhighlights}}
-                arePiecesDraggable={!isGameOver}
+                onPieceDrop={onDrop}
             />
         </div>
     )
