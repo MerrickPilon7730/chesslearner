@@ -1,304 +1,180 @@
-"use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState } from "react";
+
 import { Chess } from "chess.js";
-import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
+import { Chessboard } from "react-chessboard";
 
-import { 
-    WinnerInfo,
-    Move,
-    SetMoveHistory,
-} from "@/types/game";
+import { DispatchStateAction, MoveHistory, WinnerInfo } from "@/types/game";
 
-import { ChessNotification } from "./modals/notifications";
+import { highlightLegalMoves } from "@/app/components/chess-game/utils/highlight-legal-moves";
+import { highlightKingThreats } from "@/app/components/chess-game/utils/highlight-king-threats";
+import { pawnPromotion } from "@/app/components/chess-game/utils/pawn-promotion";
+import { handlePawnPromotion } from "@/app/components/chess-game/utils/confirm-promotion";
+import { handleMove } from "@/app/components/chess-game/utils/handle-move";
+import { canPlayerDragPiece } from "@/app/components/chess-game/utils/drag-pieces";
+import { checkGameEnd } from "@/app/components/chess-game/utils/check-game-end";
+import { ChessNotification } from "@/app/components/chess-game/modals/notifications";
+import { handleAIMove } from "@/app/components/chess-game/utils/handle-AI-move";
 
-
-// Properties expected by the ChessGame component
 type Props = {
-    // Tracks all moves made
-    setMoveHistory: SetMoveHistory
+    setMoveHistory: DispatchStateAction<MoveHistory>;
+    setFenHistory: DispatchStateAction<string[]>;
+    fenHistory: string[];
 }
 
 export function ChessPlayGame({
-    setMoveHistory, 
-}: Props) {
-    // Highlights legal moves 
-    const [legalMoveHighlights, setLegalMoveHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
-    // Highlights check/mates
-    const [checkhighlights, setCheckHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
-    // Controls whether an AI move is in progress
-    const [isProcessingAI, setIsProcessingAI] = useState(false);
-    // Holds the winner for displaying game results
-    const [winner, setWinner] = useState<WinnerInfo | undefined>(undefined);
-    // Used to show the notification component
-    const [showNotification, setShowNotification] = useState(true);
-    // Handles game state (game over true/false)
-    const [isGameOver, setIsGameOver] = useState(false);
-    // Holds the state for player side
-    const [side, setSide] = useState<"black" | "white">("white");
-    // Holds the difficulty level, default of 5
-    const [difficulty, setDifficulty] = useState(5)
-    // Handles resetting the game state
+    setMoveHistory,
+    setFenHistory,
+    fenHistory
+}: Props){
     const [game, setGame] = useState(new Chess());
+    const [side, setSide] = useState<"black" | "white">("white");
+    const [legalMoveHighlights, setLegalMoveHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
+    const [checkhighlights, setCheckHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
+    const [isGameOver, setIsGameOver] = useState(false);
+    const [winner, setWinner] = useState<WinnerInfo | undefined>(undefined);
+    const [showNotification, setShowNotification] = useState(true);
+    const [difficulty, setDifficulty] = useState(5);
 
     function isPlayerPiece(square: Square): boolean {
         const piece = game.get(square);
         return piece?.color === side[0];
     }
 
-    // *Shows legal moves for piece that is clicked
-    function onSquareClick(square: string) {
-        if (isGameOver || !isPlayerPiece(square as Square)) return;
+    function onPromotionCheck(
+        sourceSquare: Square,
+        targetSquare: Square,
+        piece: string,
+    ): boolean {
 
-        // An array of legal moves
-        const moves = game.moves({square: square as Square, verbose: true,}) as Array<{ to: string }>;
-
-        // If no legal moves for a piece clear the highlighted squares
-        if (moves.length === 0) {
-            setLegalMoveHighlights({});
-            return;
-        }
-
-        // Create a new object to store highlighted square styles
-        const newHighlights: { [square: string]: React.CSSProperties } = {};
-
-        // Loop through each legal move for the selected piece
-        moves.forEach((move) => {
-            // Highlight the destination square
-            newHighlights[move.to] = {
-                boxShadow: "inset 0 0 0 5px #baca44",
-                backgroundColor: "transparent", 
-            };
+        const isPromotion = pawnPromotion({
+            sourceSquare,
+            targetSquare,
+            piece,
         });
 
-        // Set the highlighted squares
-        setLegalMoveHighlights(newHighlights);
+        return isPromotion;
     }
 
-    // *Same as onSquareClick but starts when a piece is being dragged
+    function onPromotionPieceSelect(
+        piece?: string, 
+        promoteFromSquare?: Square,
+        promoteToSquare?: Square
+    ): boolean {
+        if (!piece || !promoteFromSquare || !promoteToSquare || !game) return false;
+
+         const pieceString = piece[1].toLowerCase();
+
+        const move = {
+            from: promoteFromSquare,
+            to: promoteToSquare,
+            promotion: pieceString,
+        };
+
+        const result = game.move(move);
+        if (!result) return false;
+
+        const updatedGame = new Chess(game.fen());
+        setGame(updatedGame);
+        setFenHistory((prev) => [...prev, updatedGame.fen()])
+
+        setMoveHistory((prev) => {
+            const newHistory = [...prev];
+            if (result.color === "w") {
+                newHistory.push([result.san]);
+            } else {
+                const last = newHistory.pop() || [""];
+                last[1] = result.san;
+                newHistory.push(last);
+            }
+            return newHistory;
+        });
+
+        setLegalMoveHighlights({});
+        highlightKingThreats({ game, setCheckHighlights });
+        checkGameEnd({ 
+            game, 
+            setIsGameOver, 
+            setWinner, 
+            setShowNotification, 
+            fenHistory
+        });
+
+        return true;
+    }
+
+    function onSquareClick(square: string){
+        highlightLegalMoves({
+            square,
+            game,
+            isGameOver,
+            isPlayerPiece,
+            setLegalMoveHighlights,
+        })
+    }
+
     function onPieceDragBegin(piece: string, sourceSquare: string) {
-        console.log('onPieceDragBegin', piece, sourceSquare);
-        if (isGameOver || !isPlayerPiece(sourceSquare as Square)) return;
-
-        const moves = game.moves({square: sourceSquare as Square, verbose: true,}) as Array<{ to: string }>;
-
-        if (moves.length === 0) {
-            setLegalMoveHighlights({});
-            return;
-        }
-
-        const newHighlights: { [square: string]: React.CSSProperties } = {};
-
-        moves.forEach((move) => {
-            newHighlights[move.to] = {
-                boxShadow: "inset 0 0 0 5px #baca44",
-                backgroundColor: "transparent", 
-            };
+        const sideColor = side[0] as "w" | "b";
+        const canDrag = canPlayerDragPiece({
+            piece,
+            game,
+            isGameOver,
+            sideColor,
         });
 
-        setLegalMoveHighlights(newHighlights);
+        if (!canDrag) return;
+
+        highlightLegalMoves({
+            square: sourceSquare,
+            game,
+            isGameOver,
+            isPlayerPiece,
+            setLegalMoveHighlights,
+        });
     }
 
-    // *Handles the player making a move and returns the updated game state is valid
-    function makeAMove(move: Move | string): Chess | null {
-        try {
-            // Create a copy of the current game state to avoid mutating the origional
-            const gameCopy = new Chess(game.fen());
-            // Attempt to make the move on the copied board
-            const result = gameCopy.move(move);
-
-            // If the move is valid return the updated game state
-            if (result) return gameCopy;
-
-            // If the move is invalid return null
-            return null;
-        } catch (error) {
-            // Handle any errors (invalid moves)
-            console.warn("Invalid move attempted:", move, error);
-            return null;
-        }
-    }
-
-    // * Highlights the king's square red when checkmated
-    const kingThreats = useCallback((gameInstance: Chess) => {
-        // Get the current board layout as a 2D array
-        const board = gameInstance.board();
-        // Check if king is in check
-        const isCheck = gameInstance.inCheck();
-        // Check if king is mated
-        const isMate = gameInstance.isCheckmate();
-
-        // Determine the threatened king
-        const kingColor = gameInstance.turn();
-        let kingSquare: string | null = null;
-            
-        // Loop through each square on the board
-        for (let row = 0; row < 8; row++) {
-            for (let col = 0; col < 8; col++) {
-                const piece = board[row][col];
-                if (piece?.type === "k" && piece.color === kingColor) {
-                    const file = String.fromCharCode("a".charCodeAt(0) + col);
-                    const rank = `${8 - row}`;
-                    kingSquare = `${file}${rank}`;
-                    break;
-                }
-            }
-        }
-
-        // If no check/mate clear highlighted squares
-        if (!isCheck && !isMate) {
-            setCheckHighlights({});
-            return;
-        }
-
-        if (kingSquare) {
-            const highlightStyle = isMate
-                ? { backgroundColor: "rgba(255, 0, 0, 0.6)" } 
-                : {
-                    boxShadow: "inset 0 0 0 5px rgba(255, 0, 0, 0.6)",
-                    backgroundColor: "transparent", 
-                };
-
-            setCheckHighlights({
-                [kingSquare]: highlightStyle,
-            });
-        }
-    }, []);
-
-    // Sends FEN(Forsyth-Edwards Notation) and difficulty/depth to the API to get the best move from Stockfish
-    const handleAIMove = useCallback(async (fen: string) => {
-        // If game is over AI stop making moves
-        if (isGameOver) return;
-        // Prevents AI from moving if it's not its turn or if it is processing a move
-        if (isProcessingAI || new Chess(fen).turn() === side[0]) return;
-
-        // Lock AI processing to prevent duplicate calls
-        setIsProcessingAI(true);
-
-        try {
-            // Send current position and difficulty/depth to Stockfish API
-            const response = await fetch("/api/stockfish-analysis", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ fen, difficulty }),
-            });
-
-            const data = await response.json();
-            const bestMove: string = data.move;
-
-            // Ensure best move in valid format (e2e4 etc)
-            if (bestMove?.length >= 4) {
-                const aiFrom = bestMove.slice(0, 2);
-                const aiTo = bestMove.slice(2, 4);
-                const aiPromotion = bestMove.length === 5 ? bestMove[4] : undefined;
-
-                // Apply Stockfish move
-                const aiGameInstance = new Chess(fen);
-                const aiGame = aiGameInstance.move({
-                    from: aiFrom,
-                    to: aiTo,
-                    promotion: aiPromotion,
-                });
-
-                if (aiGame) {
-                    // Update game state with move from Stockfish
-                    setGame(aiGameInstance);
-
-                    const lastMove = aiGameInstance.history({ verbose: true }).at(-1);
-                    if (lastMove) {
-                        setMoveHistory((prev) => {
-                            const newHistory = [...prev];
-                            if (lastMove.color === "w") {
-                                newHistory.push([lastMove.san]);
-                            } else {
-                            const last = newHistory.pop() || [""];
-                                last[1] = lastMove.san;
-                                newHistory.push(last);
-                            }
-                            return newHistory;
-                        });
-                    }
-
-                    // Check for chekmate afterStockfish moves
-                    if (aiGameInstance.isCheckmate()) {
-                        setIsGameOver(true);
-
-                        const loser = aiGameInstance.turn(); 
-                        const winnerColor = loser === 'w' ? 'Black' : 'White';
-
-                        setWinner({ result: winnerColor, message: "Checkmate"});
-                        setShowNotification(true);
-                        //Check for draw
-                    } else if (aiGameInstance.isDraw()){
-                        setIsGameOver(true);
-                        
-                        if (aiGameInstance.isStalemate()){
-                            setWinner({result: "Draw", message: "Stalemate"})
-                        } else if (aiGameInstance.isThreefoldRepetition()){
-                            setWinner({result: "Draw", message: "Threefold Repition"})
-                        } else if (aiGameInstance.isInsufficientMaterial()){
-                            setWinner({result: "Draw", message: " Insufficient Material"})
-                        } else {
-                            setWinner({result: "Draw", message: "Draw"})
-                        }
-                        setShowNotification(true);
-                    }
-
-                    // Highlight losing king
-                    kingThreats(aiGameInstance);
-                } else {
-                    // Log illegal moves
-                    console.warn("AI move was invalid for current position:", bestMove);
-                }
-            }
-        } catch (err) {
-            // Handle API or parsing errors
-            console.error("AI move failed:", err);
-        } finally {
-            // Clear AI processing flag
-            setIsProcessingAI(false);
-        }
-    }, [side, kingThreats, setGame, setIsGameOver, difficulty, isProcessingAI, setMoveHistory, isGameOver]);
-
-    // Handles the logic when a piece is dropped on target square 
-    function onDrop(sourceSquare: string, targetSquare: string): boolean {
-        // Prevents any moves if the game is already over
+    function onDrop( from: Square, to: Square): boolean {
         if (isGameOver) return false;
 
-        // Only allows moves for the player whose turn it is
-        if (game.turn() !== side[0]) return false;
+        const piece = game.get(from);
+        if (!piece) return false;
 
-        // Get the piece on the source square
-        const piece = game.get(sourceSquare as Square);
-        // Check if the piece is a pawn
-        const isPawn = piece?.type === "p";
-        // If it is a pawn, check to see if it's being promoted (moved to the 1st/8th rank)
-        const isPromotionRank = (piece?.color === "w" && targetSquare[1] === "8") || (piece?.color === "b" && targetSquare[1] === "1");
+        const isPromotion = pawnPromotion({
+            sourceSquare: from,
+            targetSquare: to,
+            piece: `${piece.color}${piece.type}`,
+        })
 
-        // Stops the pawn from moving until a promotion piece is selected
-        if (isPawn && isPromotionRank) return false;
+        let updatedGame: Chess | null = null;
 
-        // Returns updated game state if move is valid
-        const updatedGame = makeAMove({ from: sourceSquare, to: targetSquare });
+        if (isPromotion) {
+            const promotionResult = handlePawnPromotion(piece.type, from, to, game);
+            if (!promotionResult.success || !promotionResult.updatedGame) return false;
+            updatedGame = promotionResult.updatedGame;
+        } else {
+            updatedGame = handleMove(game, {
+                from,
+                to,
+            });
+            if (!updatedGame) return false;
+        }
 
-        // If move is invalid exit
-        if (!updatedGame) return false;
-
-        // Update the game state
         setGame(updatedGame);
-        // Clear any highlighted squares
         setLegalMoveHighlights({});
+
+        const newFen = updatedGame.fen();
+        const newFenHistory = [...fenHistory, newFen]
+
+        setFenHistory(newFenHistory);
 
         const lastMove = updatedGame.history({ verbose: true }).at(-1);
         if (lastMove) {
             setMoveHistory((prev) => {
                 const newHistory = [...prev];
                 if (lastMove.color === "w") {
-                    // White's turn, start a new row
                     newHistory.push([lastMove.san]);
                 } else {
-                    // Black's turn, update last row
                     const last = newHistory.pop() || [""];
                     last[1] = lastMove.san;
                     newHistory.push(last);
@@ -307,160 +183,94 @@ export function ChessPlayGame({
             });
         }
 
-        // Check for checkmate
-        if (updatedGame.isCheckmate()) {
-            setIsGameOver(true);
+        highlightKingThreats({
+            game: updatedGame,
+            setCheckHighlights,
+        })
 
-            const loser = updatedGame.turn(); 
-            const winnerColor = loser === 'w' ? 'Black' : 'White';
-
-            setWinner({ result: winnerColor, message: "Checkmate"});
-            setShowNotification(true);
-        // Check for draw
-        } else if (updatedGame.isDraw()){
-            setIsGameOver(true);
-            
-            if (updatedGame.isStalemate()){
-                setWinner({result: "Draw", message: "Stalemate"})
-            } else if (updatedGame.isThreefoldRepetition()){
-                setWinner({result: "Draw", message: "Threefold Repition"})
-            } else if (updatedGame.isInsufficientMaterial()){
-                setWinner({result: "Draw", message: " Insufficient Material"})
-            } else {
-                setWinner({result: "Draw", message: "Draw"})
-            }
-            setShowNotification(true);
-        }
-
-        // Call Checkmate function to handle that logic
-        kingThreats(updatedGame);
-
-        // Trigger the AI move 
-        if (updatedGame.turn() !== side[0]) {
-            handleAIMove(updatedGame.fen());
-        }
-
-        // Move was successful
-        return true;
-    }
-
-    // *Checks if a pawn move qualifies for a promotion
-    function onPromotionCheck(sourceSquare: Square, targetSquare: Square, piece: string): boolean {
-
-        // Check if white pawn is moving from the 7th to 8th rank and if a black pawn is moving from the 2nd rank to the 1st
-        if ((piece === "wP" && sourceSquare[1] === "7" && targetSquare[1] === "8") || (piece === "bP" && sourceSquare[1] === "2" && targetSquare[1] === "1")) {
-            // Return true, a pawn needs to be promoted
-            return true;
-        }
-
-        // Resturn false, a pawn is not being promoted
-        return false;
-    }
-
-    // *Handles the logic after a user selects a piece for pawn promotion
-    function onPromotionPieceSelect(piece?: string, promoteFromSquare?: Square, promoteToSquare?: Square): boolean {
-        // Ensure all required parameters are provided
-        if (!piece || !promoteFromSquare || !promoteToSquare) return false;
-
-        // Extract the last character of the piece string and convert to lowercase to get promotion type (e.g., "q", "r", "b", "n")
-        const promotion = piece[piece.length - 1].toLowerCase() as "q" | "r" | "b" | "n";
-        // Attempt to make the promotion move
-        const updatedGame = makeAMove({
-            from: promoteFromSquare,
-            to: promoteToSquare,
-            promotion,
+        checkGameEnd({
+            game: updatedGame,
+            setIsGameOver,
+            setWinner,
+            setShowNotification,
+            fenHistory: newFenHistory
         });
 
-        // If the move is invalid, return false
-        if (!updatedGame) return false;
-
-        // Update the game state
-        setGame(updatedGame);
-
-        // Check for king threats check/mate
-        kingThreats(updatedGame);
-
-        if (updatedGame.isCheckmate()) {
-            setIsGameOver(true);
-            const loserColor = updatedGame.turn();
-            const winnerColor = loserColor === "w" ? "Black" : "White";
-            setWinner({result: winnerColor, message: "Checkmate"});
-            setShowNotification(true);
-        } else if (updatedGame.isDraw()) {
-            setIsGameOver(true);
-            setShowNotification(true);
-        }
-
         if (updatedGame.turn() !== side[0]) {
-            handleAIMove(updatedGame.fen());
+            handleAIResponse(updatedGame.fen());
         }
-        // Promotion successful
+
         return true;
     }
-    const sideColor = useMemo(() => side[0], [side]);
 
-    function canDragPiece({ piece }: { piece: string }): boolean {
-        if (isGameOver) return false;
+    function handleAIResponse(fen: string) {
+        handleAIMove({
+            fen,
+            side,
+            difficulty, 
+            isGameOver,
+        }).then((result) => {
+            if (result.success && result.updatedGame) {
+                setGame(result.updatedGame);
 
-        const currentTurn = game.turn(); 
-        const pieceColor = piece[0];     
+                const lastMove = result.updatedGame.history({ verbose: true }).at(-1);
+                if (lastMove) {
+                    setMoveHistory((prev) => {
+                        const newHistory = [...prev];
+                        if (lastMove.color === "w") {
+                            newHistory.push([lastMove.san]);
+                        } else {
+                            const last = newHistory.pop() || [""];
+                            last[1] = lastMove.san;
+                            newHistory.push(last);
+                        }
+                        return newHistory;
+                    });
+                }
 
-         console.log(`canDragPiece: pieceColor=${pieceColor}, side=${sideColor}, currentTurn=${currentTurn}`);
-         console.log( "isGameOver: " + isGameOver)
+                const newFen = result.updatedGame.fen();
+                const updatedFenHistory = [...fenHistory, newFen];
+                setFenHistory(updatedFenHistory);
 
-        return pieceColor === sideColor && currentTurn === sideColor;
+                highlightKingThreats({
+                    game: result.updatedGame,
+                    setCheckHighlights,
+                });
+
+                checkGameEnd({
+                    game: result.updatedGame,
+                    setIsGameOver,
+                    setWinner,
+                    setShowNotification,
+                    fenHistory: updatedFenHistory,
+                });
+            } else {
+                console.warn("AI move failed:", result.error);
+            }
+        });
     }
-    
-    // Function to reset the game state
+
     function reset() {
         setShowNotification(false);
         setIsGameOver(false);
         setMoveHistory([]);
+        setFenHistory([])
         setGame(new Chess());
         setCheckHighlights({});
     }
 
-    const skipFirstEffect = useRef(true);
-
-    // useEffect to trigger the AI move
-    useEffect(() => {
-        if (skipFirstEffect.current) {
-            skipFirstEffect.current = false;
-            return;
-        }
-
-        if (showNotification) return;
-
-        if (game.turn() !== side[0]) {
-            handleAIMove(game.fen());
-        }
-    }, [side, game, handleAIMove, showNotification]);
-
-    // useEffect to clear highlights if the game is not in check/mate
-    useEffect(() => {
-        if (game.isCheckmate() || game.isCheck()) {
-            kingThreats(game);
-        }
-        else{
-            setLegalMoveHighlights({});
-        }
-    }, [game, kingThreats]);
-
-    return (
+    return(
         <div className="relative w-full max-w-[700px] border-2 dark:border-2 aspect-square">
-            <Chessboard
+            <Chessboard 
                 position={game.fen()}
-                onPieceDrop={onDrop}
+                boardOrientation={side}
                 onSquareClick={onSquareClick}
                 onPieceDragBegin={onPieceDragBegin}
+                customSquareStyles={{ ...legalMoveHighlights, ...checkhighlights}}
+                onPieceDrop={onDrop}
                 onPromotionCheck={onPromotionCheck}
                 onPromotionPieceSelect={onPromotionPieceSelect}
-                customSquareStyles={{...legalMoveHighlights, ...checkhighlights}}
-                areArrowsAllowed={true}
-                showBoardNotation={true}
-                boardOrientation={side}
                 arePiecesDraggable={!isGameOver}
-                isDraggablePiece={canDragPiece}
             />
 
             {showNotification && (
@@ -473,8 +283,7 @@ export function ChessPlayGame({
                     reset={reset}
                 />
             )}
-
         </div>
+    )
 
-    );
 }
