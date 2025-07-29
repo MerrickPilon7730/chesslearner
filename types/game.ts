@@ -12,7 +12,6 @@ export type Side = "black" | "white";
 export type SetSide = Setter<Side>;
 
 export type MoveHistory = string[][];
-export type SetMoveHistory = Setter<MoveHistory>;
 
 export type WinnerInfo = {
     result: "White" | "Black" | "Draw" | null;
