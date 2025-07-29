@@ -36,10 +36,15 @@ export function ChessNotification({
 		<div className="absolute inset-0 flex items-center justify-center z-50">
 			<Card className="p-6 rounded-lg shadow-xl text-center space-y-4 min-w-[50%] min-h-[20%]">
 				{winner && (
-				<CardTitle className="text-2xl font-bold text-green-700 -mb-2">
-					{winner.result} wins by {winner.message}
-				</CardTitle>
+					<CardTitle className="text-2xl font-bold -mb-2">
+						{winner.result === "Draw" ? (
+							<p className="text-green-700">{winner.result} by {winner.message}</p>
+						) : (
+							<p className="text-green-700">{winner.result} wins by {winner.message}</p>
+						)}
+					</CardTitle>
 				)}
+
 
 				<CardDescription className="text-xl font-bold text-white -mb-2">
 					Select Difficulty
