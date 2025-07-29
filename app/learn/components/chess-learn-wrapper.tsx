@@ -17,13 +17,15 @@ type Props = {
   setMoveHistory: DispatchStateAction<MoveHistory>;
   moveHistory: MoveHistory;
   setFenHistory: DispatchStateAction<string[]>;
+  fenHistory: string[];
 };
 
 // This component acts as a wrapper for game state and UI controls
 export function ChessLearnWrapper({
     setMoveHistory, 
     moveHistory, 
-    setFenHistory
+    setFenHistory,
+    fenHistory
 }: Props) {
     // Converts move history from string[][] to string[]
     const flatMoveHistory = useMemo(() => moveHistory.flat(), [moveHistory]);
@@ -55,6 +57,7 @@ export function ChessLearnWrapper({
                 <ChessLearnGame
                     setMoveHistory={setMoveHistory}
                     setFenHistory={setFenHistory}
+                    fenHistory={fenHistory}
                 />
                 <WhiteCapturedPieces 
                     pieces={whiteCaptured}
