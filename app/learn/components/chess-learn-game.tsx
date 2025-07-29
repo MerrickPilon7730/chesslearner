@@ -162,7 +162,10 @@ export function ChessLearnGame({
         setGame(updatedGame);
         setLegalMoveHighlights({});
 
-        setFenHistory((prev) => [...prev, updatedGame.fen()])
+        const newFen = updatedGame.fen();
+        const newFenHistory = [...fenHistory, newFen]
+
+        setFenHistory(newFenHistory);
 
         const lastMove = updatedGame.history({ verbose: true }).at(-1);
         if (lastMove) {
@@ -189,7 +192,7 @@ export function ChessLearnGame({
             setIsGameOver,
             setWinner,
             setShowNotification,
-            fenHistory
+            fenHistory: newFenHistory
         });
 
         return true;
