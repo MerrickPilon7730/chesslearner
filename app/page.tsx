@@ -17,7 +17,7 @@ export default function Home() {
           <ChessPlayWrapper setMoveHistory={setMoveHistory} moveHistory={moveHistory} fenHistory={fenHistory} setFenHistory={setFenHistory}/>
         </div>
         <div className="flex items-center justify-center py-5">
-          <AnalysisPlayWrapper moveHistory={moveHistory} fenHistory={fenHistory}/>
+          <AnalysisPlayWrapper moveHistory={moveHistory}/>
         </div>
       </div>
     </div>
