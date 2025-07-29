@@ -5,7 +5,7 @@ import { Chess } from "chess.js";
 import type { Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
 
-import { SetMoveHistory, WinnerInfo } from "@/types/game";
+import { DispatchStateAction, MoveHistory, WinnerInfo } from "@/types/game";
 
 import { highlightLegalMoves } from "@/app/components/chess-game/utils/highlight-legal-moves";
 import { highlightKingThreats } from "@/app/components/chess-game/utils/highlight-king-threats";
@@ -17,11 +17,13 @@ import { checkGameEnd } from "@/app/components/chess-game/utils/check-game-end";
 import { ChessNotification } from "@/app/components/chess-game/modals/notifications";
 
 type Props = {
-    setMoveHistory: SetMoveHistory;
+    setMoveHistory: DispatchStateAction<MoveHistory>;
+    setFenHistory: DispatchStateAction<string[]>;
 }
 
 export function ChessLearnGame({
-    setMoveHistory
+    setMoveHistory,
+    setFenHistory
 }: Props){
     const [game, setGame] = useState(new Chess());
     const [side, setSide] = useState<"black" | "white">("white");
@@ -70,7 +72,9 @@ export function ChessLearnGame({
         const result = game.move(move);
         if (!result) return false;
 
-        setGame(new Chess(game.fen()));
+        const updatedGame = new Chess(game.fen());
+        setGame(updatedGame);
+        setFenHistory((prev) => [...prev, updatedGame.fen()])
 
         setMoveHistory((prev) => {
             const newHistory = [...prev];
@@ -90,8 +94,6 @@ export function ChessLearnGame({
 
         return true;
     }
-
-
 
     function onSquareClick(square: string){
         highlightLegalMoves({
@@ -151,6 +153,8 @@ export function ChessLearnGame({
 
         setGame(updatedGame);
         setLegalMoveHighlights({});
+
+        setFenHistory((prev) => [...prev, updatedGame.fen()])
 
         const lastMove = updatedGame.history({ verbose: true }).at(-1);
         if (lastMove) {
