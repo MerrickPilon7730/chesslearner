@@ -9,17 +9,22 @@ import { BlackCapturedPieces } from "@/app/components/chess-game/black-captured-
 import { useCapturedPieces } from "@/hooks/useCapturedPieces";
 
 import { 
+    DispatchStateAction,
     MoveHistory, 
-    SetMoveHistory 
 } from "@/types/game";
 
 type Props = {
-  setMoveHistory: SetMoveHistory;
+  setMoveHistory: DispatchStateAction<MoveHistory>;
   moveHistory: MoveHistory;
+  setFenHistory: DispatchStateAction<string[]>;
 };
 
 // This component acts as a wrapper for game state and UI controls
-export function ChessLearnWrapper({setMoveHistory, moveHistory}: Props) {
+export function ChessLearnWrapper({
+    setMoveHistory, 
+    moveHistory, 
+    setFenHistory
+}: Props) {
     // Converts move history from string[][] to string[]
     const flatMoveHistory = useMemo(() => moveHistory.flat(), [moveHistory]);
     // Uses flatMoveHistory to keep track of pieces captured
@@ -49,6 +54,7 @@ export function ChessLearnWrapper({setMoveHistory, moveHistory}: Props) {
                 />
                 <ChessLearnGame
                     setMoveHistory={setMoveHistory}
+                    setFenHistory={setFenHistory}
                 />
                 <WhiteCapturedPieces 
                     pieces={whiteCaptured}
