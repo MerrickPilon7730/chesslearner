@@ -19,11 +19,13 @@ import { ChessNotification } from "@/app/components/chess-game/modals/notificati
 type Props = {
     setMoveHistory: DispatchStateAction<MoveHistory>;
     setFenHistory: DispatchStateAction<string[]>;
+    fenHistory: string[];
 }
 
 export function ChessLearnGame({
     setMoveHistory,
-    setFenHistory
+    setFenHistory,
+    fenHistory
 }: Props){
     const [game, setGame] = useState(new Chess());
     const [side, setSide] = useState<"black" | "white">("white");
@@ -90,7 +92,13 @@ export function ChessLearnGame({
 
         setLegalMoveHighlights({});
         highlightKingThreats({ game, setCheckHighlights });
-        checkGameEnd({ game, setIsGameOver, setWinner, setShowNotification });
+        checkGameEnd({ 
+            game, 
+            setIsGameOver, 
+            setWinner, 
+            setShowNotification, 
+            fenHistory
+        });
 
         return true;
     }
@@ -181,6 +189,7 @@ export function ChessLearnGame({
             setIsGameOver,
             setWinner,
             setShowNotification,
+            fenHistory
         });
 
         return true;
@@ -190,6 +199,7 @@ export function ChessLearnGame({
         setShowNotification(false);
         setIsGameOver(false);
         setMoveHistory([]);
+        setFenHistory([])
         setGame(new Chess());
         setCheckHighlights({});
     }
