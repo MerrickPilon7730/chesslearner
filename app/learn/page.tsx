@@ -15,7 +15,7 @@ export default function Learn() {
 		<div className="flex items-center justify-center">
 			<div className="grid grid-cols-1 md:grid-cols-2 w-[90%]">
 				<div className="flex items-center justify-center py-5">
-					<ChessLearnWrapper moveHistory={moveHistory} setMoveHistory={setMoveHistory} setFenHistory={setFenHistory}/>
+					<ChessLearnWrapper moveHistory={moveHistory} setMoveHistory={setMoveHistory} fenHistory={fenHistory} setFenHistory={setFenHistory}/>
 				</div>
 				<div className="flex items-center justify-center py-5">
 					<AnalysisLearnWrapper moveHistory={moveHistory} fenHistory={fenHistory}/>
