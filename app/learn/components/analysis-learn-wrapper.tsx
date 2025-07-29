@@ -11,6 +11,7 @@ import { MoveHistory } from "@/types/game";
 
 type Props = {
     moveHistory: MoveHistory;
+    fenHistory: string[];
 };
 
 export function AnalysisLearnWrapper({ moveHistory }: Props) {
