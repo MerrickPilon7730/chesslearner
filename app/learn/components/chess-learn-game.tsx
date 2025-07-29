@@ -15,6 +15,7 @@ import { handleMove } from "@/app/components/chess-game/utils/handle-move";
 import { canPlayerDragPiece } from "@/app/components/chess-game/utils/drag-pieces";
 import { checkGameEnd } from "@/app/components/chess-game/utils/check-game-end";
 import { ChessNotification } from "@/app/components/chess-game/modals/notifications";
+import { handleAIMove } from "@/app/components/chess-game/utils/handle-AI-move";
 
 type Props = {
     setMoveHistory: DispatchStateAction<MoveHistory>;
@@ -195,7 +196,58 @@ export function ChessLearnGame({
             fenHistory: newFenHistory
         });
 
+        if (updatedGame.turn() !== side[0]) {
+            handleAIResponse(updatedGame.fen());
+        }
+
         return true;
+    }
+
+    function handleAIResponse(fen: string) {
+        handleAIMove({
+            fen,
+            side,
+            difficulty, 
+            isGameOver,
+        }).then((result) => {
+            if (result.success && result.updatedGame) {
+                setGame(result.updatedGame);
+
+                const lastMove = result.updatedGame.history({ verbose: true }).at(-1);
+                if (lastMove) {
+                    setMoveHistory((prev) => {
+                        const newHistory = [...prev];
+                        if (lastMove.color === "w") {
+                            newHistory.push([lastMove.san]);
+                        } else {
+                            const last = newHistory.pop() || [""];
+                            last[1] = lastMove.san;
+                            newHistory.push(last);
+                        }
+                        return newHistory;
+                    });
+                }
+
+                const newFen = result.updatedGame.fen();
+                const updatedFenHistory = [...fenHistory, newFen];
+                setFenHistory(updatedFenHistory);
+
+                highlightKingThreats({
+                    game: result.updatedGame,
+                    setCheckHighlights,
+                });
+
+                checkGameEnd({
+                    game: result.updatedGame,
+                    setIsGameOver,
+                    setWinner,
+                    setShowNotification,
+                    fenHistory: updatedFenHistory,
+                });
+            } else {
+                console.warn("AI move failed:", result.error);
+            }
+        });
     }
 
     function reset() {
