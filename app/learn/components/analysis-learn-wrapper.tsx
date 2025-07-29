@@ -20,6 +20,7 @@ export function AnalysisLearnWrapper({ moveHistory }: Props) {
             <CardHeader className="flex items-center justify-center">
             </CardHeader>
             <CardContent className="w-full flex flex-col justify-center items-center">
+                <div className="min-h-[250px]"> Analysis</div>
                 <Opening moveHistory={moveHistory}/>
                 <MoveHistoryComp moveHistory={moveHistory} heightClamp="max-h-[200px]" />
             </CardContent>
