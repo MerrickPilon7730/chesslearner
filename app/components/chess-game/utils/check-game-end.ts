@@ -29,7 +29,7 @@ export function checkGameEnd({
 
         setWinner({ result: winnerColor, message: "Checkmate" });
         setShowNotification(true);
-    }else if (game.isStalemate()) {
+    }else if (isStalemate(fenHistory)) {
         setIsGameOver(true);
         setWinner({ result: "Draw", message: "Stalemate" });
         setShowNotification(true);
@@ -57,3 +57,15 @@ function isThreefoldRepetition(fenHistory: string[]): boolean{
 }
         
 
+function isStalemate(fenHistory: string[]){
+    if (fenHistory.length === 0) return false;
+
+    const lastFen = fenHistory[fenHistory.length - 1];
+
+    const game = new Chess(lastFen);
+
+    const noLegalMoves = game.moves().length === 0;
+    const notInCheck = !game.inCheck();
+
+    return noLegalMoves && notInCheck;
+}
