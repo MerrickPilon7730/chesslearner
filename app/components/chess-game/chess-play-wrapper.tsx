@@ -9,16 +9,23 @@ import { useCapturedPieces } from "@/hooks/useCapturedPieces";
 
 import { 
 	MoveHistory, 
-	SetMoveHistory 
+	DispatchStateAction
 } from "@/types/game";
 
 type Props = {
-  setMoveHistory: SetMoveHistory;
-  moveHistory: MoveHistory;
+	moveHistory: MoveHistory,
+	setMoveHistory: DispatchStateAction<MoveHistory>;
+	setFenHistory: DispatchStateAction<string[]>;
+	fenHistory: string[];
 };
 
 // This component acts as a wrapper for game state and UI controls
-export function ChessPlayWrapper({setMoveHistory, moveHistory}: Props) {
+export function ChessPlayWrapper({    
+	setMoveHistory, 
+    moveHistory, 
+    setFenHistory,
+    fenHistory
+}: Props) {
 	// Converts move history from string[][] to string[]
 	const flatMoveHistory = useMemo(() => moveHistory.flat(), [moveHistory]);
 	// Uses flatMoveHistory to keep track of pieces captured
@@ -48,6 +55,8 @@ export function ChessPlayWrapper({setMoveHistory, moveHistory}: Props) {
 				/>
 				<ChessPlayGame
 					setMoveHistory={setMoveHistory}
+                    setFenHistory={setFenHistory}
+                    fenHistory={fenHistory}
 				/>
 				<WhiteCapturedPieces 
 					pieces={whiteCaptured}
