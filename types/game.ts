@@ -1,3 +1,4 @@
+import { Chess } from "chess.js";
 import { 
 	Dispatch, 
 	SetStateAction 
@@ -22,6 +23,14 @@ export type Move = {
     from: string;
     to: string;
     promotion?: string;
+}
+
+export type AIMoveResult = {
+	success: boolean;
+	move?: Move;
+	updatedGame?: Chess;
+	error?: string;
+	
 }
 
 export type Pieces = string[];
