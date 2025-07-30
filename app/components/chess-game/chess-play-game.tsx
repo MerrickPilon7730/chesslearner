@@ -216,10 +216,6 @@ export function ChessPlayGame({
             fenHistory: newFenHistory
         });
 
-        if (updatedGame.turn() !== side[0]) {
-            handleAIResponse(updatedGame.fen());
-        }
-
         return true;
     }
 
@@ -232,7 +228,7 @@ export function ChessPlayGame({
             difficulty, 
             isGameOver,
         }).then((result) => {
-            if (result.success && result.updatedGame) {
+            if (result.success && result.move && result.updatedGame) {
                 setGame(result.updatedGame);
 
                 const lastMove = result.updatedGame.history({ verbose: true }).at(-1);
