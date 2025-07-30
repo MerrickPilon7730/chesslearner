@@ -3,7 +3,7 @@
 
 import { useMemo } from "react";
 
-import { ChessLearnGame } from "./chess-learn-game";
+import { ChessPlayGame } from "@/app/components/chess-game/chess-play-game";
 import { WhiteCapturedPieces } from "@/app/components/chess-game/white-captured-pieces";
 import { BlackCapturedPieces } from "@/app/components/chess-game/black-captured-pieces";
 import { useCapturedPieces } from "@/hooks/useCapturedPieces";
@@ -54,7 +54,7 @@ export function ChessLearnWrapper({
                     showScore={showBlackScore}
                     score={blackScore - whiteScore}
                 />
-                <ChessLearnGame
+                <ChessPlayGame
                     setMoveHistory={setMoveHistory}
                     setFenHistory={setFenHistory}
                     fenHistory={fenHistory}
