@@ -1,11 +1,19 @@
 
-import { useState } from "react";
+import { 
+    useState,
+    useEffect,
+    useCallback
+} from "react";
 
 import { Chess } from "chess.js";
 import type { Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
 
-import { DispatchStateAction, MoveHistory, WinnerInfo } from "@/types/game";
+import { 
+    DispatchStateAction, 
+    MoveHistory, 
+    WinnerInfo 
+} from "@/types/game";
 
 import { highlightLegalMoves } from "@/app/components/chess-game/utils/highlight-legal-moves";
 import { highlightKingThreats } from "@/app/components/chess-game/utils/highlight-king-threats";
@@ -114,6 +122,18 @@ export function ChessPlayGame({
         })
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    function isDraggablePiece({ piece, sourceSquare: _sourceSquare }: { piece: string; sourceSquare: Square }): boolean {
+        const sideColor = side[0] as "w" | "b";
+        const canDrag = canPlayerDragPiece({
+            piece,
+            game,
+            isGameOver,
+            sideColor,
+        });
+        return canDrag;
+    }
+
     function onPieceDragBegin(piece: string, sourceSquare: string) {
         const sideColor = side[0] as "w" | "b";
         const canDrag = canPlayerDragPiece({
@@ -203,7 +223,9 @@ export function ChessPlayGame({
         return true;
     }
 
-    function handleAIResponse(fen: string) {
+    const handleAIResponse = useCallback((fen: string) => {
+        if (isGameOver) return false;
+
         handleAIMove({
             fen,
             side,
@@ -248,7 +270,9 @@ export function ChessPlayGame({
                 console.warn("AI move failed:", result.error);
             }
         });
-    }
+
+        return true;
+    }, [difficulty, fenHistory, setFenHistory, isGameOver, setMoveHistory, side]);
 
     function reset() {
         setShowNotification(false);
@@ -259,12 +283,19 @@ export function ChessPlayGame({
         setCheckHighlights({});
     }
 
+    useEffect(() => {
+        if (!isGameOver && !showNotification && game.turn() !== side[0]) {
+            handleAIResponse(game.fen());
+        }
+    },[isGameOver, showNotification, side, game, handleAIResponse]);
+
     return(
         <div className="relative w-full max-w-[700px] border-2 dark:border-2 aspect-square">
             <Chessboard 
                 position={game.fen()}
                 boardOrientation={side}
                 onSquareClick={onSquareClick}
+                isDraggablePiece={isDraggablePiece}
                 onPieceDragBegin={onPieceDragBegin}
                 customSquareStyles={{ ...legalMoveHighlights, ...checkhighlights}}
                 onPieceDrop={onDrop}
