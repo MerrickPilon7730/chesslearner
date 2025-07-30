@@ -72,7 +72,7 @@ export function ChessPlayGame({
     ): boolean {
         if (!piece || !promoteFromSquare || !promoteToSquare || !game) return false;
 
-         const pieceString = piece[1].toLowerCase();
+        const pieceString = piece[1].toLowerCase();
 
         const move = {
             from: promoteFromSquare,
