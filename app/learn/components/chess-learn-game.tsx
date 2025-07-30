@@ -1,11 +1,19 @@
 
-import { useState } from "react";
+import { 
+    useCallback, 
+    useEffect, 
+    useState 
+} from "react";
 
 import { Chess } from "chess.js";
 import type { Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
 
-import { DispatchStateAction, MoveHistory, WinnerInfo } from "@/types/game";
+import { 
+    DispatchStateAction, 
+    MoveHistory, 
+    WinnerInfo 
+} from "@/types/game";
 
 import { highlightLegalMoves } from "@/app/components/chess-game/utils/highlight-legal-moves";
 import { highlightKingThreats } from "@/app/components/chess-game/utils/highlight-king-threats";
@@ -64,7 +72,7 @@ export function ChessLearnGame({
     ): boolean {
         if (!piece || !promoteFromSquare || !promoteToSquare || !game) return false;
 
-         const pieceString = piece[1].toLowerCase();
+        const pieceString = piece[1].toLowerCase();
 
         const move = {
             from: promoteFromSquare,
@@ -113,8 +121,20 @@ export function ChessLearnGame({
             setLegalMoveHighlights,
         })
     }
+    
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    function isDraggablePiece({ piece, sourceSquare: _sourceSquare }: { piece: string; sourceSquare: Square }): boolean {
+        const sideColor = side[0] as "w" | "b";
+        const canDrag = canPlayerDragPiece({
+            piece,
+            game,
+            isGameOver,
+            sideColor,
+        });
+        return canDrag;
+    }
 
-    function onPieceDragBegin(piece: string, sourceSquare: string) {
+    function onPieceDragBegin(piece: string, sourceSquare: string): boolean {
         const sideColor = side[0] as "w" | "b";
         const canDrag = canPlayerDragPiece({
             piece,
@@ -123,7 +143,7 @@ export function ChessLearnGame({
             sideColor,
         });
 
-        if (!canDrag) return;
+        if (!canDrag) return false;
 
         highlightLegalMoves({
             square: sourceSquare,
@@ -132,6 +152,8 @@ export function ChessLearnGame({
             isPlayerPiece,
             setLegalMoveHighlights,
         });
+
+        return true;
     }
 
     function onDrop( from: Square, to: Square): boolean {
@@ -203,7 +225,9 @@ export function ChessLearnGame({
         return true;
     }
 
-    function handleAIResponse(fen: string) {
+    const handleAIResponse = useCallback((fen: string) => {
+        if (isGameOver) return false;
+
         handleAIMove({
             fen,
             side,
@@ -248,7 +272,9 @@ export function ChessLearnGame({
                 console.warn("AI move failed:", result.error);
             }
         });
-    }
+
+        return true;
+    }, [difficulty, fenHistory, setFenHistory, isGameOver, setMoveHistory, side]);
 
     function reset() {
         setShowNotification(false);
@@ -259,12 +285,19 @@ export function ChessLearnGame({
         setCheckHighlights({});
     }
 
+    useEffect(() => {
+        if (!isGameOver && !showNotification && game.turn() !== side[0]) {
+            handleAIResponse(game.fen());
+        }
+    },[isGameOver, showNotification, side, game, handleAIResponse]);
+
     return(
         <div className="relative w-full max-w-[700px] border-2 dark:border-2 aspect-square">
             <Chessboard 
                 position={game.fen()}
                 boardOrientation={side}
                 onSquareClick={onSquareClick}
+                isDraggablePiece={isDraggablePiece}
                 onPieceDragBegin={onPieceDragBegin}
                 customSquareStyles={{ ...legalMoveHighlights, ...checkhighlights}}
                 onPieceDrop={onDrop}
