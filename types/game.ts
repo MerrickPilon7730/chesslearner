@@ -56,3 +56,10 @@ export type StockfishResponse = {
     bestMove: string;
     lines: PVLine[];
 };
+
+export type StockfishResult = {
+	success: boolean;
+	stockfishResponse: StockfishResponse;
+	error?: string;
+	 
+}
