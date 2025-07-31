@@ -1,8 +1,9 @@
 
-import { AIMoveResult } from "@/types/game";
 import { Chess } from "chess.js";
 
-interface Props {
+import { AIMoveResult } from "@/types/game";
+
+type Props = {
     fen: string;
     side: string;
     difficulty: number;
@@ -28,7 +29,7 @@ export async function handleAIMove({
         });
 
         const data = await response.json();
-        
+
         if (!data || !data.bestMove || !Array.isArray(data.lines) || !data.lines[0]) {
             return { success: false, error: "Incomplete data from Stockfish." };
         }
