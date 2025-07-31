@@ -28,7 +28,12 @@ export async function handleAIMove({
         });
 
         const data = await response.json();
+        
+        if (!data || !data.bestMove || !Array.isArray(data.lines) || !data.lines[0]) {
+            return { success: false, error: "Incomplete data from Stockfish." };
+        }
         const bestMove: string = data.bestMove;
+        const score = data.lines[0].score;
 
         if (!bestMove || bestMove.length < 4) {
             return { success: false, error: "Invalid move format from Stockfish." };
@@ -50,6 +55,7 @@ export async function handleAIMove({
                 to,
                 promotion,
             },
+            score,
             updatedGame,
         };
     } catch (err) {
