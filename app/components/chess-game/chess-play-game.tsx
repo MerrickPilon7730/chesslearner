@@ -154,6 +154,21 @@ export function ChessPlayGame({
         });
     }
 
+    const playAudio = useCallback((game: Chess) => {
+        requestAnimationFrame(() => {
+            let audio;
+
+            if (game.isCheckmate()){
+                audio = new Audio("/sounds/whoosh.mp3");
+            } else if (game.inCheck()){
+                audio = new Audio("/sounds/check.mp3")
+            } else {
+                audio = new Audio("/sounds/click.mp3")
+            }
+            audio.play();
+        });
+    }, []);
+
     function onDrop( from: Square, to: Square): boolean {
         if (isGameOver) return false;
 
@@ -216,6 +231,8 @@ export function ChessPlayGame({
             fenHistory: newFenHistory
         });
 
+        playAudio(updatedGame);
+
         return true;
     }
 
@@ -262,13 +279,15 @@ export function ChessPlayGame({
                     setShowNotification,
                     fenHistory: updatedFenHistory,
                 });
+
+                playAudio(result.updatedGame)
             } else {
                 console.warn("AI move failed:", result.error);
             }
         });
 
         return true;
-    }, [difficulty, fenHistory, setFenHistory, isGameOver, setMoveHistory, side]);
+    }, [difficulty, fenHistory, setFenHistory, isGameOver, setMoveHistory, side, playAudio]);
 
     function reset() {
         setShowNotification(false);
