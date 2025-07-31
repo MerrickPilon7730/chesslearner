@@ -29,6 +29,7 @@ export type AIMoveResult = {
 	success: boolean;
 	move?: Move;
 	updatedGame?: Chess;
+	score?: number;
 	error?: string;
 	
 }
