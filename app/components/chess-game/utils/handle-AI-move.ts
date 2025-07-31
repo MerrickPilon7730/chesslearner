@@ -21,14 +21,14 @@ export async function handleAIMove({
     if (game.turn() === side[0]) return { success: false, error: "Not AI's turn." };
 
     try {
-        const response = await fetch("/api/stockfish-analysis/best-move", {
+        const response = await fetch("/api/stockfish-analysis/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ fen, difficulty }),
         });
 
         const data = await response.json();
-        const bestMove: string = data.move;
+        const bestMove: string = data.bestMove;
 
         if (!bestMove || bestMove.length < 4) {
             return { success: false, error: "Invalid move format from Stockfish." };
