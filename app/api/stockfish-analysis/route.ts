@@ -3,10 +3,16 @@ import { NextResponse } from "next/server";
 import { spawn } from "child_process";
 import path from "path";
 
-export async function POST(request: Request){
+import { 
+    PVLine,
+    StockfishResponse,
+} from "@/types/game";
+
+
+export async function POST(request: Request) {
     const body = await request.json();
-    const {fen, difficulty} = body;
-    
+    const { fen, difficulty } = body;
+
     const skillLevel = Math.max(1, Math.min(20, parseInt(difficulty, 10) || 5));
 
     if (!fen) {
@@ -24,7 +30,8 @@ export async function POST(request: Request){
         stockfish.stdin.write(`position fen ${fen}\n`);
         stockfish.stdin.write("go depth 14\n");
 
-        const pvLines: Array<{ multipv: number; score: string; moves: string }> = [];
+        const pvLines: PVLine[] = [];
+        let bestMove = "";
 
         stockfish.stdout.on("data", (data) => {
             const text = data.toString();
@@ -46,13 +53,18 @@ export async function POST(request: Request){
                         scoreStr = `Mate in ${Math.abs(scoreValue)}`;
                     }
 
-                    pvLines[multipv - 1] = { multipv, score: scoreStr, moves };
+                    pvLines[multipv - 1] = { multiPv: multipv, score: scoreStr, moves };
                 }
 
-                if (line.startsWith("bestmove")) {
+                const bestMoveMatch = line.match(/^bestmove\s+(\w{4,5})/);
+                if (bestMoveMatch) {
+                    bestMove = bestMoveMatch[1];
                     stockfish.kill();
 
-                    const result = pvLines.filter(Boolean);
+                    const result: StockfishResponse = {
+                        bestMove,
+                        lines: pvLines.filter(Boolean),
+                    };
 
                     resolve(NextResponse.json(result));
                 }
@@ -72,5 +84,4 @@ export async function POST(request: Request){
             );
         });
     });
-
 }
