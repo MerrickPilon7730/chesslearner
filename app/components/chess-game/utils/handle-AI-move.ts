@@ -21,7 +21,7 @@ export async function handleAIMove({
     if (game.turn() === side[0]) return { success: false, error: "Not AI's turn." };
 
     try {
-        const response = await fetch("/api/stockfish-analysis", {
+        const response = await fetch("/api/stockfish-analysis/best-move", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ fen, difficulty }),
