@@ -59,7 +59,7 @@ export type StockfishResponse = {
 
 export type StockfishResult = {
 	success: boolean;
-	stockfishResponse: StockfishResponse;
+	stockfishResponse?: StockfishResponse;
 	error?: string;
 	 
 }
