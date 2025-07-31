@@ -45,10 +45,13 @@ export const pieceValues: PieceValues = {
 
 export type DispatchStateAction<T> = Dispatch<SetStateAction<T>>;
 
-export type StockfishPv = {
-	multiPv: number;
-	score: string;
-	move: string;
-}
+export type PVLine = {
+    multiPv: number;
+    score: string;
+    moves: string;
+};
 
-export const StockfishResponse: StockfishPv[] = [];
+export type StockfishResponse = {
+    bestMove: string;
+    lines: PVLine[];
+};
