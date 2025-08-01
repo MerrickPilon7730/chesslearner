@@ -5,21 +5,34 @@ import { useState } from "react";
 import { AnalysisPlayWrapper } from "./components/analysis/analysis-play-wrapper";
 import { ChessPlayWrapper } from "./components/chess-game/chess-play-wrapper";
 
-export default function Home() {
-  // Tracks all moves made
-  const [moveHistory, setMoveHistory] = useState<string[][]>([]);
-  const [fenHistory, setFenHistory] = useState<string[]>([]);
+import { Side } from "@/types/game";
 
-  return (
-    <div className="flex items-center justify-center">
-      <div className="grid grid-cols-1 md:grid-cols-2 w-[90%]">
-        <div className="flex items-center justify-center py-5">
-          <ChessPlayWrapper setMoveHistory={setMoveHistory} moveHistory={moveHistory} fenHistory={fenHistory} setFenHistory={setFenHistory}/>
-        </div>
-        <div className="flex items-center justify-center py-7">
-          <AnalysisPlayWrapper moveHistory={moveHistory}/>
-        </div>
-      </div>
-    </div>
-  );
+export default function Home() {
+ 	// Tracks all moves made
+  	const [moveHistory, setMoveHistory] = useState<string[][]>([]);
+  	const [fenHistory, setFenHistory] = useState<string[]>([]);
+	const [side, setSide] = useState<Side>("white");
+	const [isGameOver, setIsGameOver] = useState(false);
+
+	return (
+		<div className="flex items-center justify-center">
+			<div className="grid grid-cols-1 md:grid-cols-2 w-[90%]">
+				<div className="flex items-center justify-center py-5">
+					<ChessPlayWrapper 
+						setMoveHistory={setMoveHistory} 
+						moveHistory={moveHistory} 
+						fenHistory={fenHistory} 
+						setFenHistory={setFenHistory}
+						side={side}
+						setSide={setSide}
+						isGameOver={isGameOver}
+						setIsGameOver={setIsGameOver}
+					/>
+				</div>
+				<div className="flex items-center justify-center py-7">
+					<AnalysisPlayWrapper moveHistory={moveHistory}/>
+				</div>
+			</div>
+		</div>
+	);
 }
