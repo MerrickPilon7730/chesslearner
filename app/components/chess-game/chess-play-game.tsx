@@ -12,6 +12,7 @@ import { Chessboard } from "react-chessboard";
 import { 
     DispatchStateAction, 
     MoveHistory, 
+    Side, 
     WinnerInfo 
 } from "@/types/game";
 
@@ -29,18 +30,24 @@ type Props = {
     setMoveHistory: DispatchStateAction<MoveHistory>;
     setFenHistory: DispatchStateAction<string[]>;
     fenHistory: string[];
+    side: Side;
+    setSide: DispatchStateAction<Side>;
+    isGameOver: boolean;
+    setIsGameOver: DispatchStateAction<boolean>;
 }
 
 export function ChessPlayGame({
     setMoveHistory,
     setFenHistory,
-    fenHistory
+    fenHistory,
+    side,
+    setSide,
+    isGameOver,
+    setIsGameOver
 }: Props){
     const [game, setGame] = useState(new Chess());
-    const [side, setSide] = useState<"black" | "white">("white");
     const [legalMoveHighlights, setLegalMoveHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
     const [checkhighlights, setCheckHighlights] = useState<{[square: string]: React.CSSProperties;}>({});
-    const [isGameOver, setIsGameOver] = useState(false);
     const [winner, setWinner] = useState<WinnerInfo | undefined>(undefined);
     const [showNotification, setShowNotification] = useState(true);
     const [difficulty, setDifficulty] = useState(5);
@@ -287,7 +294,7 @@ export function ChessPlayGame({
         });
 
         return true;
-    }, [difficulty, fenHistory, setFenHistory, isGameOver, setMoveHistory, side, playAudio]);
+    }, [difficulty, fenHistory, setFenHistory, isGameOver, setMoveHistory, side, playAudio, setIsGameOver]);
 
     function reset() {
         setShowNotification(false);
