@@ -5,11 +5,14 @@ import { useState } from "react";
 import { AnalysisPlayWrapper } from "./components/analysis/analysis-play-wrapper";
 import { ChessPlayWrapper } from "./components/chess-game/chess-play-wrapper";
 
-import { Side } from "@/types/game";
+import { 
+	MoveHistory, 
+	Side 
+} from "@/types/game";
 
 export default function Home() {
  	// Tracks all moves made
-  	const [moveHistory, setMoveHistory] = useState<string[][]>([]);
+  	const [moveHistory, setMoveHistory] = useState<MoveHistory>([]);
   	const [fenHistory, setFenHistory] = useState<string[]>([]);
 	const [side, setSide] = useState<Side>("white");
 	const [isGameOver, setIsGameOver] = useState(false);
