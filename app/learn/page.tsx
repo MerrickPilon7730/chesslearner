@@ -33,7 +33,12 @@ export default function Learn() {
 					/>
 				</div>
 				<div className="flex items-center justify-center py-7">
-					<AnalysisLearnWrapper moveHistory={moveHistory} fenHistory={fenHistory}/>
+					<AnalysisLearnWrapper 
+						moveHistory={moveHistory} 
+						fenHistory={fenHistory}
+						side={side}
+						isGameOver={isGameOver}
+					/>
 				</div>
 			</div>
 		</div>
