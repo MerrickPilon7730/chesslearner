@@ -2,6 +2,8 @@
 import React from "react";
 import Image from "next/image";
 
+import { Pieces } from "@/types/game";
+
 const pieceImages: Record<string, string> = {
   p: "/chess-pieces/black/bP.png",
   n: "/chess-pieces/black/bN.png",
@@ -11,7 +13,7 @@ const pieceImages: Record<string, string> = {
 };
 
 type Props = {
-	pieces: string[];
+	pieces: Pieces;
 	showScore: boolean;
 	score: number;
 };

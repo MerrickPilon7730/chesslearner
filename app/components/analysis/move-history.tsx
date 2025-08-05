@@ -1,11 +1,13 @@
 
+import { MoveHistory } from "@/types/game";
 import { useEffect, useRef } from "react";
 
 type Props = {
-    moveHistory: string[][];
+    moveHistory: MoveHistory;
+    heightClamp?: string;
 };
 
-export function MoveHistory({moveHistory}: Props){
+export function MoveHistoryComp({moveHistory, heightClamp}: Props){
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -14,7 +16,13 @@ export function MoveHistory({moveHistory}: Props){
         }
     }, [moveHistory])
 
-    const emptyRowsCount = Math.max(0, 10 - moveHistory.length);
+    let emptyRowsCount = 0;
+
+    if (heightClamp === "max-h-[200px]"){
+        emptyRowsCount = Math.max(0, 5 - moveHistory.length);
+    } else{
+        emptyRowsCount = Math.max(0, 10 - moveHistory.length);
+    }
 
     return(
         <div className="w-[90%] text-white">
@@ -25,7 +33,7 @@ export function MoveHistory({moveHistory}: Props){
                 <p>Black</p>
             </div>
             <div 
-                className="max-h-[400px] min-h-[0] overflow-y-auto"
+                className={`overflow-y-auto min-h-[0] ${heightClamp ?? "max-h-[400px]"}`}
                 ref={scrollRef}
                 >
                 <table className="w-full text-white text-sm table-fixed border-separate border-spacing-0">

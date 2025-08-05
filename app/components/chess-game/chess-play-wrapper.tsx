@@ -2,18 +2,39 @@
 
 import { useMemo } from "react";
 
-import { ChessGame } from "./chess-game";
+import { ChessPlayGame } from "./chess-play-game";
 import { WhiteCapturedPieces } from "./white-captured-pieces";
 import { BlackCapturedPieces } from "./black-captured-pieces";
 import { useCapturedPieces } from "@/hooks/useCapturedPieces";
 
+import { 
+	MoveHistory, 
+	DispatchStateAction,
+	Side
+} from "@/types/game";
+
 type Props = {
-  setMoveHistory: React.Dispatch<React.SetStateAction<string[][]>>;
-  moveHistory: string[][];
+	moveHistory: MoveHistory,
+	setMoveHistory: DispatchStateAction<MoveHistory>;
+	setFenHistory: DispatchStateAction<string[]>;
+	fenHistory: string[];
+	side: Side;
+	setSide: DispatchStateAction<Side>;
+	isGameOver: boolean;
+	setIsGameOver: DispatchStateAction<boolean>;
 };
 
 // This component acts as a wrapper for game state and UI controls
-export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
+export function ChessPlayWrapper({    
+	setMoveHistory, 
+    moveHistory, 
+    setFenHistory,
+    fenHistory,
+	side,
+	setSide,
+	isGameOver,
+	setIsGameOver,
+}: Props) {
 	// Converts move history from string[][] to string[]
 	const flatMoveHistory = useMemo(() => moveHistory.flat(), [moveHistory]);
 	// Uses flatMoveHistory to keep track of pieces captured
@@ -41,8 +62,14 @@ export function ChessWrapper({setMoveHistory, moveHistory}: Props) {
 					showScore={showBlackScore}
 					score={blackScore - whiteScore}
 				/>
-				<ChessGame
+				<ChessPlayGame
 					setMoveHistory={setMoveHistory}
+                    setFenHistory={setFenHistory}
+                    fenHistory={fenHistory}
+					side={side}
+					setSide={setSide}
+					isGameOver={isGameOver}
+					setIsGameOver={setIsGameOver}
 				/>
 				<WhiteCapturedPieces 
 					pieces={whiteCaptured}

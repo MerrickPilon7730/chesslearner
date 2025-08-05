@@ -1,12 +1,14 @@
 
 import { useOpeningName } from "@/hooks/useOpeningName"
 
+import { MoveHistory } from "@/types/game";
+
 type Props ={
-    moveHistory: string[];
+    moveHistory: MoveHistory;
 }
 
 export function Opening({moveHistory}: Props){
-    const openingName = useOpeningName(moveHistory);
+    const openingName = useOpeningName(moveHistory.flat());
 
     return(
         <div className="w-[90%] mb-10 text-white">

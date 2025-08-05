@@ -2,9 +2,14 @@
 import { useEffect, useState } from "react";
 import { Chess } from "chess.js";
 
-const pieceValues: Record<string, number> = {
-  	p: 1, n: 3, b: 3, r: 5, q: 9
-};
+import { pieceValues } from "@/types/game";
+
+type PieceKey = keyof typeof pieceValues;
+
+function isPieceKey(key: string): key is PieceKey {
+  return key in pieceValues;
+}
+
 
 type UseCapturedPiecesResult = {
 	whiteCaptured: string[];
@@ -38,11 +43,13 @@ export function useCapturedPieces(moveHistory: string[]): UseCapturedPiecesResul
 		});
 
 		const sortByValue = (arr: string[]) =>
-		[...arr].sort(
-			(a, b) =>
-			(pieceValues[a.toLowerCase()] ?? 0) -
-			(pieceValues[b.toLowerCase()] ?? 0)
-		);
+			[...arr].sort((a, b) => {
+			const aKey = a.toLowerCase();
+			const bKey = b.toLowerCase();
+			const aVal = isPieceKey(aKey) ? pieceValues[aKey] : 0;
+			const bVal = isPieceKey(bKey) ? pieceValues[bKey] : 0;
+			return aVal - bVal;
+    	});
 
 		const sortedWhite = sortByValue(w);
 		const sortedBlack = sortByValue(b);
@@ -51,7 +58,10 @@ export function useCapturedPieces(moveHistory: string[]): UseCapturedPiecesResul
 		setBlackCaptured(sortedBlack);
 
 		const calcPoints = (pieces: string[]) =>
-		pieces.reduce((acc, p) => acc + (pieceValues[p.toLowerCase()] ?? 0), 0);
+			pieces.reduce((acc, p) => {
+			const key = p.toLowerCase();
+			return acc + (isPieceKey(key) ? pieceValues[key] : 0);
+		}, 0);
 
 		setWhitePoints(calcPoints(sortedWhite));
 		setBlackPoints(calcPoints(sortedBlack));
