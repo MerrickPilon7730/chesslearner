@@ -33,14 +33,13 @@ export function AnalysisLearnWrapper({
     isGameOver,
 }: Props) {
     const [stockfishData, setStockfishData] = useState<StockfishResponse>();
+    const lastfen = fenHistory?.[fenHistory.length - 1]
 
     useEffect(() => {
-        if (!fenHistory || isGameOver) return;
-
-        const fen = fenHistory[fenHistory.length - 1]
+        if (!lastfen || isGameOver) return;
 
         FetchAnalysis({
-            fen,
+            fen: lastfen,
             side,
             difficulty: 20,
             isGameOver,
@@ -49,7 +48,7 @@ export function AnalysisLearnWrapper({
                 setStockfishData(result.stockfishResponse);
             }
         });
-    }, [fenHistory, isGameOver, side]);
+    }, [lastfen, isGameOver, side]);
 
     return (
         <Card className="w-full h-full max-w-[90%] max-h-90%]">
