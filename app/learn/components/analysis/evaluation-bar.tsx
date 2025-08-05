@@ -1,7 +1,7 @@
 import { StockfishResponse } from "@/types/game"
 
 type Props ={
-    stockfishData: StockfishResponse
+    stockfishData: StockfishResponse | undefined;
 }
 
 export function EvaluationBar({
