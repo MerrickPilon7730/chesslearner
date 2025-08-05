@@ -324,6 +324,10 @@ export function ChessPlayGame({
                 onPromotionCheck={onPromotionCheck}
                 onPromotionPieceSelect={onPromotionPieceSelect}
                 arePiecesDraggable={!isGameOver}
+                allowDragOutsideBoard={false}
+                areArrowsAllowed={true}
+                arePremovesAllowed={true}
+                clearPremovesOnRightClick={true}
             />
 
             {showNotification && (
