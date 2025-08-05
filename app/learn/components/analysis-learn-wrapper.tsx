@@ -1,26 +1,62 @@
 
+import { useEffect, useState } from "react";
+
 import { 
     Card,
     CardHeader,
     CardContent,
 } from "@/components/ui/card"
+
+import { EvaluationBar } from "./analysis/evaluation-bar";
 import { MoveHistoryComp } from "@/app/components/analysis/move-history";
 import { Opening } from "@/app/components/analysis/opening";
 
-import { MoveHistory } from "@/types/game";
+import { FetchAnalysis } from "./utils/fetch-analysis";
+
+import { 
+    MoveHistory, 
+    Side, 
+    StockfishResponse
+} from "@/types/game";
 
 type Props = {
     moveHistory: MoveHistory;
     fenHistory: string[];
+    side: Side;
+    isGameOver: boolean;
 };
 
-export function AnalysisLearnWrapper({ moveHistory }: Props) {
+export function AnalysisLearnWrapper({ 
+    moveHistory,
+    fenHistory,
+    side,
+    isGameOver,
+}: Props) {
+    const [stockfishData, setStockfishData] = useState<StockfishResponse>();
+
+    useEffect(() => {
+        if (!fenHistory || isGameOver) return;
+
+        const fen = fenHistory[fenHistory.length - 1]
+
+        FetchAnalysis({
+            fen,
+            side,
+            difficulty: 20,
+            isGameOver,
+        }).then((result) => {
+            if (result.success && result.stockfishResponse) {
+                setStockfishData(result.stockfishResponse);
+            }
+        });
+    }, [fenHistory, isGameOver, side]);
+
     return (
         <Card className="w-full h-full max-w-[90%] max-h-90%]">
             <CardHeader className="flex items-center justify-center">
             </CardHeader>
             <CardContent className="w-full flex flex-col justify-center items-center">
-                <div className="min-h-[250px]"> Analysis</div>
+                <EvaluationBar stockfishData={stockfishData}/>
                 <Opening moveHistory={moveHistory}/>
                 <MoveHistoryComp moveHistory={moveHistory} heightClamp="max-h-[200px]" />
             </CardContent>
