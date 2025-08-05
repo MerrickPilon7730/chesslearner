@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         stockfish.stdin.write(`setoption name Skill Level value ${skillLevel}\n`);
         stockfish.stdin.write("setoption name MultiPV value 3\n");
         stockfish.stdin.write(`position fen ${fen}\n`);
-        stockfish.stdin.write("go depth 14\n");
+        stockfish.stdin.write(`go depth ${difficulty}\n`);
 
         const pvLines: PVLine[] = [];
         let bestMove = "";
@@ -57,6 +57,7 @@ export async function POST(request: Request) {
                 }
 
                 const bestMoveMatch = line.match(/^bestmove\s+(\w{4,5})/);
+
                 if (bestMoveMatch) {
                     bestMove = bestMoveMatch[1];
                     stockfish.kill();
