@@ -1,8 +1,7 @@
 
-import { AIAnalysis } from "@/types/game"
 
 type Props = {
-    analysis: AIAnalysis;
+    analysis: string;
 }
 
 export function AIComponent({
@@ -12,7 +11,7 @@ export function AIComponent({
 
     return (
         <div className="w-[90%] text-white">
-            {analysis.explanation}
+            {analysis}
         </div>
     )
 }
