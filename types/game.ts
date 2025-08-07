@@ -63,11 +63,3 @@ export type StockfishResult = {
 	error?: string;
 	 
 }
-
-export type AIAnalysis = {
-	explanation: string;
-	strategic: string;
-	plans: string;
-	threats: string;
-	weaknesses: string;
-}
