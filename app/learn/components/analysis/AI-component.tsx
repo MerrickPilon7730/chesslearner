@@ -10,8 +10,9 @@ export function AIComponent({
 
 
     return (
-        <div className="w-[90%] text-white">
-            {analysis}
+        <div className="w-[90%] overflow-auto text-white max-h-[200px]">
+            <p className="flex justify-center text-2xl font-bold mb-2">Analysis</p>
+            <p>{analysis}</p>
         </div>
     )
 }
