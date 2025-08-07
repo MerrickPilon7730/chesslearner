@@ -21,29 +21,16 @@ export function generateAIPrompt({
     const pv = stockfishResponse.lines?.[0] || "";
 
     return `
-        You are a chess coach AI. You will receive a FEN position, a best move, and a principal variation.
-
         FEN: ${fen}
         Best move: ${bestMove}
-        Principal variation: ${pv}
         Side to move: ${side}
+        PV: ${pv}
 
-        Your task:
-        - Explain why ${bestMove} is the best move in the current position.
-        - Describe strategic and tactical ideas.
-        - Suggest follow-up plans for ${side}.
-        - Identify threats and weaknesses.
-
-        Please return your analysis in **valid JSON** with the following structure:
+        Explain why ${bestMove} is the best move for ${side} in this position in plain english. Focus on strategic and tactical ideas behind the PV. Return **only** valid JSON:
 
         {
-            "explanation": "<plain English explanation of why the move is best>",
-            "strategic": "<strategic and tactical reasons for the move>",
-            "plans": "<possible plans and ideas for the side to move>",
-            "threats": "<key threats or tactical ideas in the position>",
-            "weaknesses": "<any weaknesses the side to move must watch out for>"
+        "explanation": "..."
         }
-
-        Only output valid JSON. Do not include commentary or text outside the JSON.
     `.trim();
+
 }
