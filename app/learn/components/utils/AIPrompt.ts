@@ -29,7 +29,7 @@ export function generateAIPrompt({
         Side to move: ${side}
 
         Your task:
-        - Explain why ${bestMove} is the best move.
+        - Explain why ${bestMove} is the best move in the current position.
         - Describe strategic and tactical ideas.
         - Suggest follow-up plans for ${side}.
         - Identify threats and weaknesses.
