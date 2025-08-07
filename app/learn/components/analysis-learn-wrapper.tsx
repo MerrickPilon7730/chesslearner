@@ -7,16 +7,17 @@ import {
     CardContent,
 } from "@/components/ui/card"
 
-import { EvaluationBar } from "./analysis/evaluation-bar";
+import { AIComponent } from "./analysis/AI-component";
 import { MoveHistoryComp } from "@/app/components/analysis/move-history";
 import { Opening } from "@/app/components/analysis/opening";
 
 import { FetchAnalysis } from "./utils/fetch-analysis";
+import { generateAIPrompt } from "./utils/AIPrompt";
 
 import { 
+    AIAnalysis,
     MoveHistory, 
     Side, 
-    StockfishResponse
 } from "@/types/game";
 
 type Props = {
@@ -32,30 +33,57 @@ export function AnalysisLearnWrapper({
     side,
     isGameOver,
 }: Props) {
-    const [stockfishData, setStockfishData] = useState<StockfishResponse>();
+    const intialAnalysis: AIAnalysis = {
+        explanation: "",
+        strategic: "",
+        plans: "",
+        threats: "",
+        weaknesses: "",
+    }
+
     const lastfen = fenHistory?.[fenHistory.length - 1]
+    const [aiResponse, setAiResponse] = useState<AIAnalysis>(intialAnalysis)
 
     useEffect(() => {
         if (!lastfen || isGameOver) return;
+        console.log(lastfen);
 
-        FetchAnalysis({
-            fen: lastfen,
-            side,
-            difficulty: 20,
-            isGameOver,
-        }).then((result) => {
+        (async () => {
+            const result = await FetchAnalysis({
+                fen: lastfen,
+                side,
+                difficulty: 20,
+                isGameOver,
+            });
+
             if (result.success && result.stockfishResponse) {
-                setStockfishData(result.stockfishResponse);
+                const prompt = generateAIPrompt({
+                    fen: lastfen,
+                    stockfishResponse: result.stockfishResponse,
+                });
+
+                const aiRes = await fetch("/api/openAI-analysis", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ prompt }),
+                });
+
+                const aiJson = await aiRes.json();
+                const parsed = JSON.parse(aiJson.result);
+                setAiResponse(parsed);
             }
-        });
+        })();
     }, [lastfen, isGameOver, side]);
+
 
     return (
         <Card className="w-full h-full max-w-[90%] max-h-90%]">
             <CardHeader className="flex items-center justify-center">
             </CardHeader>
             <CardContent className="w-full flex flex-col justify-center items-center">
-                <EvaluationBar stockfishData={stockfishData}/>
+                <AIComponent analysis={aiResponse} />
                 <Opening moveHistory={moveHistory}/>
                 <MoveHistoryComp moveHistory={moveHistory} heightClamp="max-h-[200px]" />
             </CardContent>
