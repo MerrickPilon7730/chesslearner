@@ -14,8 +14,7 @@ import { Opening } from "@/app/components/analysis/opening";
 import { FetchAnalysis } from "./utils/fetch-analysis";
 import { generateAIPrompt } from "./utils/AIPrompt";
 
-import { 
-    AIAnalysis,
+import {
     MoveHistory, 
     Side, 
 } from "@/types/game";
@@ -33,16 +32,8 @@ export function AnalysisLearnWrapper({
     side,
     isGameOver,
 }: Props) {
-    const intialAnalysis: AIAnalysis = {
-        explanation: "",
-        strategic: "",
-        plans: "",
-        threats: "",
-        weaknesses: "",
-    }
-
     const lastfen = fenHistory?.[fenHistory.length - 1]
-    const [aiResponse, setAiResponse] = useState<AIAnalysis>(intialAnalysis)
+    const [aiResponse, setAiResponse] = useState("")
 
     useEffect(() => {
         if (!lastfen || isGameOver) return;
@@ -70,9 +61,8 @@ export function AnalysisLearnWrapper({
                     body: JSON.stringify({ prompt }),
                 });
 
-                const aiJson = await aiRes.json();
-                const parsed = JSON.parse(aiJson.result);
-                setAiResponse(parsed);
+                const response = await aiRes.text();
+                setAiResponse(response);
             }
         })();
     }, [lastfen, isGameOver, side]);
