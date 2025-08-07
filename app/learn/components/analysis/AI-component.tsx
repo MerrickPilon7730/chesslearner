@@ -11,7 +11,7 @@ export function AIComponent({
 
 
     return (
-        <div>
+        <div className="w-[90%] text-white">
             {analysis.explanation}
         </div>
     )
