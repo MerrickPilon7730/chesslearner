@@ -1,4 +1,4 @@
-// app/api/openai/route.ts
+
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -27,7 +27,12 @@ export async function POST(request: Request) {
 		const json = await res.json();
 		const content = json.choices?.[0]?.message?.content;
 
-		return NextResponse.json({ result: content });
+		return new Response(content, {
+			status: 200,
+			headers: {
+				"Content-Type": "text/plain",
+			},
+		});
 	} catch (error: unknown) {
 		let message = "Unknown error";
 		if (error instanceof Error) {
