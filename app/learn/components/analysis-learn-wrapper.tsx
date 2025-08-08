@@ -34,10 +34,12 @@ export function AnalysisLearnWrapper({
 }: Props) {
     const lastfen = fenHistory?.[fenHistory.length - 1]
     const [aiResponse, setAiResponse] = useState("")
+    const [isThinking, setIsThinking] = useState(false);
 
     useEffect(() => {
         if (!lastfen || isGameOver) return;
-        console.log(lastfen);
+
+        setIsThinking(true);
 
         (async () => {
             const result = await FetchAnalysis({
@@ -53,7 +55,7 @@ export function AnalysisLearnWrapper({
                     stockfishResponse: result.stockfishResponse,
                 });
 
-                const aiRes = await fetch("/api/openAI-analysis", {
+                const res = await fetch("/api/openAI-analysis", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -61,9 +63,11 @@ export function AnalysisLearnWrapper({
                     body: JSON.stringify({ prompt }),
                 });
 
-                const response = await aiRes.text();
+                const response = await res.text();
                 setAiResponse(response);
             }
+
+            setIsThinking(false);
         })();
     }, [lastfen, isGameOver, side]);
 
@@ -72,8 +76,8 @@ export function AnalysisLearnWrapper({
         <Card className="w-full h-full max-w-[90%] max-h-90%]">
             <CardHeader className="flex items-center justify-center">
             </CardHeader>
-            <CardContent className="w-full flex flex-col items-center gap-y-4 overflow-y-auto max-h-[75vh] p-4">
-                <AIComponent analysis={aiResponse} />
+            <CardContent className="w-full flex flex-col items-center gap-y-4 overflow-y-auto max-h-[75vh]">
+                <AIComponent analysis={aiResponse} isThinking={isThinking}/>
                 <Opening moveHistory={moveHistory}/>
                 <MoveHistoryComp moveHistory={moveHistory} heightClamp="max-h-[200px]" />
             </CardContent>
