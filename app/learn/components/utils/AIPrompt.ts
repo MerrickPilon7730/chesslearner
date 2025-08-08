@@ -26,7 +26,7 @@ export function generateAIPrompt({
         Side to move: ${side}
         PV: ${pv}
 
-        State the ${bestMove} for ${side} in this position in plain english. Focus on strategic and tactical ideas behind the PV. Return a string only:
+        Explain why ${bestMove} for ${side} is the best move according to the PV. Return a string only:
     `.trim();
 
 }
