@@ -13,7 +13,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { fen, difficulty } = body;
 
-    const skillLevel = Math.max(1, Math.min(20, parseInt(difficulty, 10) || 5));
 
     if (!fen) {
         return NextResponse.json({ error: "FEN is required" }, { status: 400 });
@@ -25,7 +24,6 @@ export async function POST(request: Request) {
         const stockfish = spawn(enginePath);
 
         stockfish.stdin.write("uci\n");
-        stockfish.stdin.write(`setoption name Skill Level value ${skillLevel}\n`);
         stockfish.stdin.write("setoption name MultiPV value 3\n");
         stockfish.stdin.write(`position fen ${fen}\n`);
         stockfish.stdin.write(`go depth ${difficulty}\n`);
