@@ -39,37 +39,62 @@ export function AnalysisLearnWrapper({
     useEffect(() => {
         if (!lastfen || isGameOver) return;
 
-        setIsThinking(true);
+        let controller: AbortController | null = null;
 
-        (async () => {
-            const result = await FetchAnalysis({
-                fen: lastfen,
-                side,
-                difficulty: 20,
-                isGameOver,
-            });
+        const debounce = setTimeout(() => {
+            controller = new AbortController(); 
+            setIsThinking(true);
 
-            if (result.success && result.stockfishResponse) {
-                const prompt = generateAIPrompt({
-                    fen: lastfen,
-                    stockfishResponse: result.stockfishResponse,
-                });
+            (async () => {
+                try {
+                    const result = await FetchAnalysis({
+                        fen: lastfen,
+                        side,
+                        difficulty: 20,
+                        isGameOver,
+                    });
 
-                const res = await fetch("/api/openAI-analysis", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ prompt }),
-                });
+                    if (result.success && result.stockfishResponse) {
+                        const prompt = generateAIPrompt({
+                            fen: lastfen,
+                            stockfishResponse: result.stockfishResponse,
+                        });
 
-                const response = await res.text();
-                setAiResponse(response);
+                        const res = await fetch("/api/openAI-analysis", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            signal: controller.signal,
+                            body: JSON.stringify({ prompt }),
+                        });
+
+                        const response = await res.text();
+
+                        if (fenHistory[fenHistory.length - 1] === lastfen) {
+                            setAiResponse(response);
+                        }
+                    }
+                } catch (error) {
+                    if (error instanceof DOMException && error.name === "AbortError") {
+                        console.log("Previous request aborted.");
+                    } else {
+                        console.error("AI analysis error:", error);
+                    }
+                } finally {
+                    setIsThinking(false);
+                }
+            })();
+        }, 300);
+
+        return () => {
+            clearTimeout(debounce);
+            if (controller) {
+                controller.abort(); 
             }
+        };
+    }, [lastfen, isGameOver, side, fenHistory]);
 
-            setIsThinking(false);
-        })();
-    }, [lastfen, isGameOver, side]);
 
 
     return (
