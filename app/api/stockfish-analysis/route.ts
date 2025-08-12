@@ -13,6 +13,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { fen, difficulty } = body;
 
+    const elo = (2850 / 20) * difficulty;
 
     if (!fen) {
         return NextResponse.json({ error: "FEN is required" }, { status: 400 });
@@ -25,8 +26,11 @@ export async function POST(request: Request) {
 
         stockfish.stdin.write("uci\n");
         stockfish.stdin.write("setoption name MultiPV value 3\n");
+        stockfish.stdin.write(`setoption name Skill Level value ${difficulty}\n`); 
+        stockfish.stdin.write("setoption name UCI_LimitStrength value true\n");
+        stockfish.stdin.write(`setoption name UCI_Elo value ${elo}\n`); 
         stockfish.stdin.write(`position fen ${fen}\n`);
-        stockfish.stdin.write(`go depth ${difficulty}\n`);
+        stockfish.stdin.write(`go depth 10\n`);
 
         const pvLines: PVLine[] = [];
         let bestMove = "";
