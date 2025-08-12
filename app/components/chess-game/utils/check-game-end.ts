@@ -41,6 +41,10 @@ export function checkGameEnd({
         setIsGameOver(true);
         setWinner({ result: "Draw", message: "Insufficient Material" });
         setShowNotification(true);
+    } else if (maxTurn(fenHistory)) {
+        setIsGameOver(true);
+        setWinner({result: "Draw", message: "Turn Limit Exceeded"})
+        setShowNotification(true);
     }
 }
 
@@ -56,7 +60,6 @@ function isThreefoldRepetition(fenHistory: string[]): boolean{
     return false;
 }
         
-
 function isStalemate(fenHistory: string[]){
     if (fenHistory.length === 0) return false;
 
@@ -70,7 +73,7 @@ function isStalemate(fenHistory: string[]){
     return noLegalMoves && notInCheck;
 }
 
-export function isInsufficientMaterial(fenHistory: string[]): boolean {
+function isInsufficientMaterial(fenHistory: string[]): boolean {
     const lastFen = fenHistory[fenHistory.length - 1]
 
 	const game = new Chess(lastFen);
@@ -122,4 +125,19 @@ export function isInsufficientMaterial(fenHistory: string[]): boolean {
 	}
 
 	return false;
+}
+
+function maxTurn(fenHistory: string[]){
+    if (fenHistory.length === 0) return false;
+
+    const maxHalfMoves = 200;
+    const lastFen = fenHistory[fenHistory.length - 1];
+
+    const game = new Chess(lastFen);
+
+    if (fenHistory.length >= maxHalfMoves && !game.inCheck()){
+        return true;
+    }
+
+    return false;
 }

@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { fen, difficulty } = body;
 
-    const skillLevel = Math.max(1, Math.min(20, parseInt(difficulty, 10) || 5));
+    const elo = (2850 / 20) * difficulty;
 
     if (!fen) {
         return NextResponse.json({ error: "FEN is required" }, { status: 400 });
@@ -25,10 +25,12 @@ export async function POST(request: Request) {
         const stockfish = spawn(enginePath);
 
         stockfish.stdin.write("uci\n");
-        stockfish.stdin.write(`setoption name Skill Level value ${skillLevel}\n`);
         stockfish.stdin.write("setoption name MultiPV value 3\n");
+        stockfish.stdin.write(`setoption name Skill Level value ${difficulty}\n`); 
+        stockfish.stdin.write("setoption name UCI_LimitStrength value true\n");
+        stockfish.stdin.write(`setoption name UCI_Elo value ${elo}\n`); 
         stockfish.stdin.write(`position fen ${fen}\n`);
-        stockfish.stdin.write("go depth 14\n");
+        stockfish.stdin.write(`go depth 10\n`);
 
         const pvLines: PVLine[] = [];
         let bestMove = "";
@@ -57,6 +59,7 @@ export async function POST(request: Request) {
                 }
 
                 const bestMoveMatch = line.match(/^bestmove\s+(\w{4,5})/);
+
                 if (bestMoveMatch) {
                     bestMove = bestMoveMatch[1];
                     stockfish.kill();

@@ -5,11 +5,11 @@ import Image from "next/image";
 import { Pieces } from "@/types/game";
 
 const pieceImages: Record<string, string> = {
-  P: "/chess-pieces/white/wP.png",
-  N: "/chess-pieces/white/wN.png",
-  B: "/chess-pieces/white/wB.png",
-  R: "/chess-pieces/white/wR.png",
-  Q: "/chess-pieces/white/wQ.png",
+  P: "/images/chess-pieces/white/wP.png",
+  N: "/images/chess-pieces/white/wN.png",
+  B: "/images/chess-pieces/white/wB.png",
+  R: "/images/chess-pieces/white/wR.png",
+  Q: "/images/chess-pieces/white/wQ.png",
 };
 
 type Props = {

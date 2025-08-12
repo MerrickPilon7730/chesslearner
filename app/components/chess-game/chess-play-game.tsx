@@ -326,8 +326,6 @@ export function ChessPlayGame({
                 arePiecesDraggable={!isGameOver}
                 allowDragOutsideBoard={false}
                 areArrowsAllowed={true}
-                arePremovesAllowed={true}
-                clearPremovesOnRightClick={true}
             />
 
             {showNotification && (
