@@ -21,14 +21,14 @@ export async function POST(request: Request) {
 
     const enginePath = path.resolve("engines", process.platform === "win32" ? "stockfish.exe" : "stockfish");
 
-    return new Promise((resolve, reject) => {
+    const result = await new Promise<StockfishResponse>((resolve, reject) => {
         const stockfish = spawn(enginePath);
 
         stockfish.stdin.write("uci\n");
         stockfish.stdin.write("setoption name MultiPV value 3\n");
-        stockfish.stdin.write(`setoption name Skill Level value ${difficulty}\n`); 
+        stockfish.stdin.write(`setoption name Skill Level value ${difficulty}\n`);
         stockfish.stdin.write("setoption name UCI_LimitStrength value true\n");
-        stockfish.stdin.write(`setoption name UCI_Elo value ${elo}\n`); 
+        stockfish.stdin.write(`setoption name UCI_Elo value ${elo}\n`);
         stockfish.stdin.write(`position fen ${fen}\n`);
         stockfish.stdin.write(`go depth 10\n`);
 
@@ -41,11 +41,11 @@ export async function POST(request: Request) {
 
             for (const line of lines) {
                 const pvMatch = line.match(/info .* multipv (\d+) score (cp|mate) (-?\d+) .* pv (.+)/);
-                if (pvMatch) {
-                    const multipv = parseInt(pvMatch[1], 10);
-                    const scoreType = pvMatch[2];
-                    const scoreValue = parseInt(pvMatch[3], 10);
-                    const moves = pvMatch[4].trim();
+                    if (pvMatch) {
+                        const multipv = parseInt(pvMatch[1], 10);
+                        const scoreType = pvMatch[2];
+                        const scoreValue = parseInt(pvMatch[3], 10);
+                        const moves = pvMatch[4].trim();
 
                     let scoreStr = "";
                     if (scoreType === "cp") {
@@ -59,17 +59,14 @@ export async function POST(request: Request) {
                 }
 
                 const bestMoveMatch = line.match(/^bestmove\s+(\w{4,5})/);
-
                 if (bestMoveMatch) {
                     bestMove = bestMoveMatch[1];
                     stockfish.kill();
 
-                    const result: StockfishResponse = {
+                    resolve({
                         bestMove,
                         lines: pvLines.filter(Boolean),
-                    };
-
-                    resolve(NextResponse.json(result));
+                    });
                 }
             }
         });
@@ -79,12 +76,9 @@ export async function POST(request: Request) {
         });
 
         stockfish.on("error", (err) => {
-            reject(
-                NextResponse.json(
-                    { error: "Stockfish failed to start", details: err.message },
-                    { status: 500 }
-                )
-            );
+            reject(new Error("Stockfish failed to start: " + err.message));
         });
     });
+
+    return NextResponse.json(result);
 }
