@@ -30,17 +30,17 @@ export function useCapturedPieces(moveHistory: string[]): UseCapturedPiecesResul
 		const b: string[] = [];
 
 		moveHistory.forEach((moveStr) => {
-		const move = game.move(moveStr);
-		if (move && move.captured) {
-			const isWhiteMove = move.color === "w";
-			const capturedPiece = move.captured;
-			if (isWhiteMove) {
-			w.push(capturedPiece);
-			} else {
-			b.push(capturedPiece.toUpperCase());
+			const move = game.move(moveStr);
+			if (move && move.captured) {
+				const isWhiteMove = move.color === "w";
+				const capturedPiece = move.captured;
+				if (isWhiteMove) {
+					w.push(capturedPiece);
+				} else {
+					b.push(capturedPiece.toUpperCase());
+				}
 			}
-		}
-		});
+			});
 
 		const sortByValue = (arr: string[]) =>
 			[...arr].sort((a, b) => {
